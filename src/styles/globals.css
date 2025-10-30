@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f5f5dc; /* Light beige */
+  --foreground: #333333;
+  --primary: #a0522d; /* Sienna */
+  --primary-foreground: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #333333;
+  --muted: #e0e0d0;
+  --muted-foreground: #666666;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}

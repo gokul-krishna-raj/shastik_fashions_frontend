@@ -13,7 +13,7 @@ const CartPage = () => {
 
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { items: cartItems, total, status, error } = useSelector((state: RootState) => state.cart);
+  const { data: cartItems, total, status, error } = useSelector((state: RootState) => state.cart);
 
   useEffect(() => {
     dispatch(fetchCart());
@@ -43,18 +43,18 @@ const CartPage = () => {
   return (
     <>
       <NextSeo
-        title="Your Shopping Cart | My E-commerce Store"
+        title="Your Shopping Cart | Shastik Fashions"
         description="Review and manage items in your shopping cart."
       />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Your Shopping Cart</h1>
+        {/* <h1 className="text-3xl font-bold mb-6">Your Shopping Cart</h1> */}
 
         {cartItems.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-lg text-gray-600 mb-4">Your cart is empty.</p>
             <button
               onClick={() => router.push('/products')}
-              className="bg-primary text-white px-6 py-3 rounded-md hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="bg-primary px-6 py-3 rounded-md hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               aria-label="Continue shopping"
             >
               Continue Shopping

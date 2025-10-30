@@ -1,6 +1,7 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import * as authService from '@/services/authService';
+import { getLocalStorageItem, getParsedLocalStorageItem } from '../lib/utils';
 
 interface User {
   id: string;
@@ -17,8 +18,8 @@ interface UserState {
 }
 
 const initialState: UserState = {
-  token: typeof window !== 'undefined' ? localStorage.getItem('authToken') : null,
-  profile: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('userProfile') || 'null') : null,
+  token: getLocalStorageItem('authToken'),
+  profile: getParsedLocalStorageItem('userProfile'),
   status: 'idle',
   error: null,
 };
@@ -29,7 +30,7 @@ export const login = createAsyncThunk(
     try {
       const response = await authService.login(credentials);
       localStorage.setItem('authToken', response.token);
-      localStorage.setItem('userProfile', JSON.stringify(response.user));
+      localStorage.setItem('userProfile', JSON.stringify(response.data));
       return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -39,7 +40,7 @@ export const login = createAsyncThunk(
 
 export const register = createAsyncThunk(
   'user/register',
-  async (credentials: { name: string; email: string; password: string }, { rejectWithValue }) => {
+  async (credentials: { name: string; email: string; mobile: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await authService.register(credentials);
       localStorage.setItem('authToken', response.token);

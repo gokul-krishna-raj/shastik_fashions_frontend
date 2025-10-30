@@ -8,6 +8,7 @@ import ProductCard, { ProductCardSkeleton } from '@/components/ProductCard';
 import FilterSidebar from '@/components/FilterSidebar';
 import SortDropdown from '@/components/SortDropdown';
 import { Menu } from 'lucide-react';
+import { SareeFilters } from '@/types/filters';
 
 const ProductsPage = () => {
   const router = useRouter();
@@ -35,16 +36,17 @@ const ProductsPage = () => {
   useEffect(() => {
     const { category, priceRange, fabric, color, sort: sortParam, page: pageParam } = router.query;
 
-    const initialFilters = {
-      category: (category as string) || '',
-      priceRange: priceRange ? (priceRange as string).split('-').map(Number) as [number, number] : [0, 1000],
-      fabric: (fabric as string) || '',
-      color: (color as string) || '',
+    const initialFilters: SareeFilters = {
+      category: typeof category === 'string' ? [category] : (category as string[] || []),
+      priceRange: priceRange ? (priceRange as string).split('-').map(Number) as [number, number] : [500, 20000],
+      fabric: typeof fabric === 'string' ? [fabric] : (fabric as string[] || []),
+      color: typeof color === 'string' ? [color] : (color as string[] || []),
     };
     const initialSort = (sortParam as string) || 'newest';
     const initialPage = pageParam ? Number(pageParam) : 1;
 
     // Only dispatch if values are different from current Redux state
+    // Note: Deep comparison for filters might be needed for complex objects
     if (JSON.stringify(initialFilters) !== JSON.stringify(filters)) {
       dispatch(setFilters(initialFilters));
     }
@@ -71,12 +73,12 @@ const ProductsPage = () => {
   // Effect to update URL when filters or sort change
   useEffect(() => {
     const query: Record<string, string | string[]> = {};
-    if (filters.category) query.category = filters.category;
-    if (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 1000) {
+    if (filters.category.length > 0) query.category = filters.category;
+    if (filters.priceRange[0] !== 500 || filters.priceRange[1] !== 20000) {
       query.priceRange = `${filters.priceRange[0]}-${filters.priceRange[1]}`;
     }
-    if (filters.fabric) query.fabric = filters.fabric;
-    if (filters.color) query.color = filters.color;
+    if (filters.fabric.length > 0) query.fabric = filters.fabric;
+    if (filters.color.length > 0) query.color = filters.color;
     if (sort !== 'newest') query.sort = sort;
     if (page > 1) query.page = String(page);
 
@@ -86,15 +88,29 @@ const ProductsPage = () => {
     }, undefined, { shallow: true });
   }, [filters, sort, page]);
 
-  const handleFilterChange = useCallback((newFilter: any) => {
-    dispatch(setFilters({ ...filters, ...newFilter }));
+  const handleApplyFilters = useCallback((newFilters: SareeFilters) => {
+    dispatch(setFilters(newFilters));
     dispatch(resetProducts()); // Reset products and page when filters change
-  }, [filters, dispatch]);
+    dispatch(fetchProducts({ page: 1, filters: newFilters, sort, append: false }));
+  }, [dispatch, sort]);
+
+  const handleClearAllFilters = useCallback(() => {
+    const clearedFilters: SareeFilters = {
+      category: [],
+      color: [],
+      priceRange: [500, 20000],
+      fabric: [],
+    };
+    dispatch(setFilters(clearedFilters));
+    dispatch(resetProducts());
+    dispatch(fetchProducts({ page: 1, filters: clearedFilters, sort, append: false }));
+  }, [dispatch, sort]);
 
   const handleSortChange = useCallback((newSort: string) => {
     dispatch(setSort(newSort));
     dispatch(resetProducts()); // Reset products and page when sort changes
-  }, [dispatch]);
+    dispatch(fetchProducts({ page: 1, filters, sort: newSort, append: false }));
+  }, [dispatch, filters]);
 
   const handleAddToCart = (productId: string) => {
     console.log(`Add product ${productId} to cart`);
@@ -109,13 +125,13 @@ const ProductsPage = () => {
   return (
     <>
       <NextSeo
-        title="Products | My E-commerce Store"
+        title="Products | Shastik Fashions"
         description="Browse all products in our store."
       />
-      <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col lg:flex-row bg-[#FFF9F5]">
         {/* Filter Sidebar Toggle for Mobile */}
         <button
-          className="md:hidden p-4 bg-primary text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="lg:hidden p-4 bg-[#8A1538] text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#C99A5E] focus:ring-offset-2"
           onClick={() => setIsSidebarOpen(true)}
           aria-label="Open filters sidebar"
         >
@@ -127,13 +143,15 @@ const ProductsPage = () => {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           filters={filters}
-          onFilterChange={handleFilterChange}
+          onFilterChange={setFilters} // This prop is no longer used directly for applying filters
+          onApply={handleApplyFilters}
+          onClearAll={handleClearAllFilters}
         />
 
         {/* Product List */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 lg:pl-0">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">All Products</h1>
+            <h1 className="text-3xl font-bold text-[#8A1538]">All Products</h1>
             <SortDropdown currentSort={sort} onSortChange={handleSortChange} />
           </div>
 
@@ -160,7 +178,7 @@ const ProductsPage = () => {
               );
             })}
             {status === 'loading' &&
-              Array.from({ length: filters.limit }).map((_, i) => <ProductCardSkeleton key={i} />)}
+              Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
 
           {status === 'failed' && <p className="text-center text-red-500 mt-8">Failed to load products.</p>}

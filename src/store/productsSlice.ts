@@ -1,5 +1,6 @@
-
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { SareeFilters } from '@/types/filters';
+import { getProducts } from '@/services/productService';
 
 interface Product {
   id: string;
@@ -12,20 +13,15 @@ interface Product {
   fabric: string;
   color: string;
   stock: number;
-  images: string[]; // For image gallery
+  images: string[];
 }
 
 interface ProductsState {
   items: Product[];
-  currentProduct: Product | null; // New field for single product details
+  currentProduct: Product | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
-  filters: {
-    category: string;
-    priceRange: [number, number];
-    fabric: string;
-    color: string;
-  };
+  filters: SareeFilters;
   sort: string;
   page: number;
   limit: number;
@@ -39,10 +35,10 @@ const initialState: ProductsState = {
   status: 'idle',
   error: null,
   filters: {
-    category: '',
-    priceRange: [0, 1000],
-    fabric: '',
-    color: '',
+    category: [],
+    priceRange: [500, 20000],
+    fabric: [],
+    color: [],
   },
   sort: 'newest',
   page: 1,
@@ -54,114 +50,143 @@ const initialState: ProductsState = {
 interface FetchProductsArgs {
   page?: number;
   limit?: number;
-  filters?: ProductsState['filters'];
+  filters?: SareeFilters;
   sort?: string;
-  append?: boolean; // New argument to indicate whether to append or replace
+  append?: boolean;
+  type?: 'all' | 'new-arrivals' | 'best-sellers';
+  categoryId?: string;
 }
 
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
-  async ({ page = 1, limit = 12, filters = initialState.filters, sort = initialState.sort, append = false }: FetchProductsArgs) => {
-    // TODO: Implement API call to fetch products with filters and pagination
-    console.log('Fetching products with:', { page, limit, filters, sort });
+  async (
+    { 
+      page = 1, 
+      limit = 12, 
+      filters = initialState.filters, 
+      sort = initialState.sort, 
+      append = false, 
+      type = 'all', 
+      categoryId 
+    }: FetchProductsArgs,
+    { rejectWithValue }
+  ) => {
+    console.log('Fetching products with:', { page, limit, filters, sort, type, categoryId });
 
-    // Mock API response
-    const allMockProducts: Product[] = Array.from({ length: 50 }, (_, i) => ({
-      id: `product-${i + 1}`,
-      name: `Product ${i + 1}`,
-      description: `This is a detailed description for Product ${i + 1}. It is made of high-quality materials and offers great value.`,
-      price: parseFloat((Math.random() * (1000 - 10) + 10).toFixed(2)),
-      imageUrl: `https://via.placeholder.com/300x200/FFDDC1/333333?text=Product+${i + 1}`,
-      altText: `Product ${i + 1}`,
-      category: ['Electronics', 'Apparel', 'Home Goods', 'Books'][Math.floor(Math.random() * 4)],
-      fabric: ['Cotton', 'Polyester', 'Wool', 'Silk'][Math.floor(Math.random() * 4)],
-      color: ['Red', 'Blue', 'Green', 'Black', 'White'][Math.floor(Math.random() * 5)],
-      stock: Math.floor(Math.random() * 100) + 1,
-      images: [
-        `https://via.placeholder.com/600x400/FFDDC1/333333?text=Product+${i + 1}+Image+1`,
-        `https://via.placeholder.com/600x400/B0E0E6/333333?text=Product+${i + 1}+Image+2`,
-        `https://via.placeholder.com/600x400/DDA0DD/333333?text=Product+${i + 1}+Image+3`,
-      ],
-    }));
+    try {
+      const response = await getProducts(page, limit, categoryId);
 
-    // Apply filters
-    let filteredProducts = allMockProducts.filter(product => {
-      let match = true;
-      if (filters.category && product.category !== filters.category) {
-        match = false;
+      // Mock data for now
+      const allMockProducts: Product[] = Array.from({ length: 50 }, (_, i) => ({
+        id: `product-${i + 1}`,
+        name: `Product ${i + 1}`,
+        description: `This is a detailed description for Product ${i + 1}. It is made of high-quality materials and offers great value.`,
+        price: parseFloat((Math.random() * (20000 - 500) + 500).toFixed(2)),
+        imageUrl: `https://d1c96i8uprz2te.cloudfront.net/360x554/filters:quality(5)/product/product_gallery/68dfcee10b968.jpg`,
+        altText: `Product ${i + 1}`,
+        category: ['Silk Sarees', 'Cotton Sarees', 'Organza Sarees', 'Banarasi Sarees', 'Kanchipuram Sarees', 'Linen Sarees', 'Designer Sarees'][Math.floor(Math.random() * 7)],
+        fabric: ['Silk', 'Cotton', 'Georgette', 'Chiffon', 'Crepe', 'Satin', 'Organza'][Math.floor(Math.random() * 7)],
+        color: ['Red', 'Blue', 'Green', 'Pink', 'Yellow', 'Black', 'White', 'Gold', 'Maroon', 'Purple'][Math.floor(Math.random() * 10)],
+        stock: Math.floor(Math.random() * 100) + 1,
+        images: [
+          `https://d1c96i8uprz2te.cloudfront.net/360x554/filters:quality(5)/product/product_gallery/68dfcee10b968.jpg`,
+          `https://d1c96i8uprz2te.cloudfront.net/360x554/filters:quality(5)/product/product_gallery/68dfcee10b968.jpg`,
+          `https://d1c96i8uprz2te.cloudfront.net/360x554/filters:quality(5)/product/product_gallery/68dfcee10b968.jpg`,
+        ],
+      }));
+
+      let productsToFilter = allMockProducts;
+
+      // Apply type filter
+      if (type === 'new-arrivals') {
+        productsToFilter = allMockProducts.filter(product => parseInt(product.id.split('-')[1]) % 2 === 0);
+      } else if (type === 'best-sellers') {
+        productsToFilter = allMockProducts.filter(product => parseInt(product.id.split('-')[1]) % 2 !== 0);
       }
-      if (product.price < filters.priceRange[0] || product.price > filters.priceRange[1]) {
-        match = false;
-      }
-      if (filters.fabric && product.fabric !== filters.fabric) {
-        match = false;
-      }
-      if (filters.color && product.color !== filters.color) {
-        match = false;
-      }
-      return match;
-    });
 
-    // Apply sorting
-    filteredProducts.sort((a, b) => {
-      if (sort === 'price_asc') {
-        return a.price - b.price;
-      } else if (sort === 'price_desc') {
-        return b.price - a.price;
-      } else if (sort === 'name_asc') {
-        return a.name.localeCompare(b.name);
-      } else if (sort === 'name_desc') {
-        return b.name.localeCompare(a.name);
-      }
-      return 0; // newest or default
-    });
+      // Apply filters
+      let filteredProducts = productsToFilter.filter(product => {
+        let match = true;
+        if (filters.category.length > 0 && !filters.category.includes(product.category)) {
+          match = false;
+        }
+        if (product.price < filters.priceRange[0] || product.price > filters.priceRange[1]) {
+          match = false;
+        }
+        if (filters.fabric.length > 0 && !filters.fabric.includes(product.fabric)) {
+          match = false;
+        }
+        if (filters.color.length > 0 && !filters.color.includes(product.color)) {
+          match = false;
+        }
+        return match;
+      });
 
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const paginatedProducts = filteredProducts.slice(start, end);
+      // Apply sorting
+      filteredProducts.sort((a, b) => {
+        if (sort === 'price_asc') {
+          return a.price - b.price;
+        } else if (sort === 'price_desc') {
+          return b.price - a.price;
+        } else if (sort === 'name_asc') {
+          return a.name.localeCompare(b.name);
+        } else if (sort === 'name_desc') {
+          return b.name.localeCompare(a.name);
+        }
+        return 0;
+      });
 
-    const totalPages = Math.ceil(filteredProducts.length / limit);
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      const paginatedProducts = filteredProducts.slice(start, end);
 
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+      const totalPages = Math.ceil(filteredProducts.length / limit);
 
-    return {
-      products: paginatedProducts,
-      page,
-      totalPages,
-      hasMore: page < totalPages,
-      append,
-    };
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      return {
+        products: paginatedProducts,
+        page,
+        totalPages,
+        hasMore: page < totalPages,
+        append,
+      };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch products');
+    }
   }
 );
 
 export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
-  async (id: string) => {
-    // TODO: Implement API call to fetch a single product by ID
-    console.log('Fetching product by ID:', id);
+  async (id: string, { rejectWithValue }) => {
+    try {
+      console.log('Fetching product by ID:', id);
 
-    // Mock API response for a single product
-    const mockProduct: Product = {
-      id: id,
-      name: `Product ${id}`,
-      description: `This is a detailed description for Product ${id}. It is made of high-quality materials and offers great value. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`,
-      price: parseFloat((Math.random() * (1000 - 10) + 10).toFixed(2)),
-      imageUrl: `https://via.placeholder.com/600x400/FFDDC1/333333?text=Product+${id}+Image+1`,
-      altText: `Product ${id}`,
-      category: ['Electronics', 'Apparel', 'Home Goods', 'Books'][Math.floor(Math.random() * 4)],
-      fabric: ['Cotton', 'Polyester', 'Wool', 'Silk'][Math.floor(Math.random() * 4)],
-      color: ['Red', 'Blue', 'Green', 'Black', 'White'][Math.floor(Math.random() * 5)],
-      stock: Math.floor(Math.random() * 100) + 1,
-      images: [
-        `https://via.placeholder.com/600x400/FFDDC1/333333?text=Product+${id}+Image+1`,
-        `https://via.placeholder.com/600x400/B0E0E6/333333?text=Product+${id}+Image+2`,
-        `https://via.placeholder.com/600x400/DDA0DD/333333?text=Product+${id}+Image+3`,
-      ],
-    };
+      const mockProduct: Product = {
+        id: id,
+        name: `Product ${id}`,
+        description: `This is a detailed description for Product ${id}. It is made of high-quality materials and offers great value. Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
+        price: parseFloat((Math.random() * (20000 - 500) + 500).toFixed(2)),
+        imageUrl: `https://d1c96i8uprz2te.cloudfront.net/360x554/filters:quality(5)/product/product_gallery/68dfcee10b968.jpg`,
+        altText: `Product ${id}`,
+        category: ['Silk Sarees', 'Cotton Sarees', 'Organza Sarees', 'Banarasi Sarees'][Math.floor(Math.random() * 4)],
+        fabric: ['Silk', 'Cotton', 'Georgette', 'Chiffon'][Math.floor(Math.random() * 4)],
+        color: ['Red', 'Blue', 'Green', 'Pink'][Math.floor(Math.random() * 4)],
+        stock: Math.floor(Math.random() * 100) + 1,
+        images: [
+          `https://d1c96i8uprz2te.cloudfront.net/360x554/filters:quality(5)/product/product_gallery/68dfcee10b968.jpg`,
+          `https://d1c96i8uprz2te.cloudfront.net/360x554/filters:quality(5)/product/product_gallery/68dfcee10b968.jpg`,
+          `https://d1c96i8uprz2te.cloudfront.net/360x554/filters:quality(5)/product/product_gallery/68dfcee10b968.jpg`,
+        ],
+      };
 
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-    return mockProduct;
+      return mockProduct;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to fetch product details');
+    }
   }
 );
 
@@ -169,17 +194,17 @@ const productsSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
-    setFilters: (state, action: PayloadAction<ProductsState['filters']>) => {
+    setFilters: (state, action: PayloadAction<SareeFilters>) => {
       state.filters = action.payload;
-      state.page = 1; // Reset page when filters change
-      state.items = []; // Clear items when filters change
-      state.hasMore = true; // Assume more data when filters change
+      state.page = 1;
+      state.items = [];
+      state.hasMore = true;
     },
     setSort: (state, action: PayloadAction<string>) => {
       state.sort = action.payload;
-      state.page = 1; // Reset page when sort changes
-      state.items = []; // Clear items when sort changes
-      state.hasMore = true; // Assume more data when sort changes
+      state.page = 1;
+      state.items = [];
+      state.hasMore = true;
     },
     setPage: (state, action: PayloadAction<number>) => {
       state.page = action.payload;
@@ -196,6 +221,7 @@ const productsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch Products
       .addCase(fetchProducts.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -213,9 +239,10 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || 'Failed to fetch products';
+        state.error = (action.payload as string) || 'Failed to fetch products';
         state.hasMore = false;
       })
+      // Fetch Product by ID
       .addCase(fetchProductById.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -227,7 +254,7 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || 'Failed to fetch product details';
+        state.error = (action.payload as string) || 'Failed to fetch product details';
         state.currentProduct = null;
       });
   },

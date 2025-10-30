@@ -3,18 +3,19 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useRef } from 'react';
 
-const categories = [
-  { name: 'Kottanchi soft silk', imageUrl: 'https://d1c96i8uprz2te.cloudfront.net/320x320/filters:quality(5)/category/Z5G96IrPQIxmXRBFyTZqlXYUbg5T6emLxATp7e8e.jpg', slug: 'kottanchi-soft-silk' },
-  { name: 'Pure cotton', imageUrl: 'https://d1c96i8uprz2te.cloudfront.net/320x320/filters:quality(5)/category/kbqbLdYdBUyBuS5gGTBx1vesAszPG9NDtsMCpJf6.jpg', slug: 'pure-cotton' },
-  { name: 'Kalyani cotton', imageUrl: 'https://d1c96i8uprz2te.cloudfront.net/320x320/filters:quality(5)/category/kbqbLdYdBUyBuS5gGTBx1vesAszPG9NDtsMCpJf6.jpg', slug: 'kalyani-cotton' },
-  { name: 'Home & Kitchen', imageUrl: 'https://d1c96i8uprz2te.cloudfront.net/320x320/filters:quality(5)/category/kbqbLdYdBUyBuS5gGTBx1vesAszPG9NDtsMCpJf6.jpg', slug: 'home-kitchen' },
-  { name: 'Kottanchi soft silk', imageUrl: 'https://d1c96i8uprz2te.cloudfront.net/320x320/filters:quality(5)/category/Z5G96IrPQIxmXRBFyTZqlXYUbg5T6emLxATp7e8e.jpg', slug: 'kottanchi-soft-silk-2' },
-  { name: 'Pure cotton', imageUrl: 'https://d1c96i8uprz2te.cloudfront.net/320x320/filters:quality(5)/category/kbqbLdYdBUyBuS5gGTBx1vesAszPG9NDtsMCpJf6.jpg', slug: 'pure-cotton-2' },
-  { name: 'Kalyani cotton', imageUrl: 'https://d1c96i8uprz2te.cloudfront.net/320x320/filters:quality(5)/category/kbqbLdYdBUyBuS5gGTBx1vesAszPG9NDtsMCpJf6.jpg', slug: 'kalyani-cotton-2' },
-  { name: 'Home & Kitchen', imageUrl: 'https://d1c96i8uprz2te.cloudfront.net/320x320/filters:quality(5)/category/kbqbLdYdBUyBuS5gGTBx1vesAszPG9NDtsMCpJf6.jpg', slug: 'home-kitchen-2' },
-];
+interface Category {
+  _id: string;
+  name: string;
+  description: string;
+  image: string;
+}
 
-const CategorySection = () => {
+interface CategorySectionProps {
+  categories: Category[];
+  loading: boolean;
+}
+
+const CategorySection: React.FC<CategorySectionProps> = ({ categories, loading }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -26,6 +27,17 @@ const CategorySection = () => {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-center mb-8">Shop by Category</h2>
+          <p>Loading categories...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 bg-gray-50">
@@ -56,15 +68,15 @@ const CategorySection = () => {
             className="flex overflow-x-auto md:overflow-x-hidden gap-6 pb-4 scrollbar-hide scroll-smooth"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {categories.map((category, index) => (
+            {categories.slice(0, 10).map((category) => (
               <Link
-                key={`${category.slug}-${index}`}
-                href={`/categories/${category.slug}`}
+                key={category._id}
+                href={`/categories/${category._id}`}
                 className="flex-shrink-0 w-32 sm:w-36 text-center group"
               >
                 <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto mb-4 shadow-md rounded-full overflow-hidden transition-transform duration-300 transform group-hover:scale-105 group-hover:shadow-xl">
                   <Image
-                    src={category.imageUrl}
+                    src={category.image === 'no-photo.jpg' ? '/Images/shastik_fahsion_logo.png' : category.image}
                     alt={category.name}
                     fill
                     className="object-cover rounded-full"

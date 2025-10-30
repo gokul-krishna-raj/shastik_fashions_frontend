@@ -3,7 +3,10 @@ import { NextSeo } from 'next-seo';
 import HeroCarousel from '@/components/HeroCarousel';
 import CategorySection from '@/components/CategorySection';
 import ProductCard, { ProductCardSkeleton } from '@/components/ProductCard';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '@/store';
+import { fetchCategories } from '@/store/categorySlice';
 
 interface Product {
   id: string;
@@ -30,6 +33,16 @@ const mockBestSellers: Product[] = Array.from({ length: 8 }, (_, i) => ({
 }));
 
 const HomePage = () => {
+  
+  const dispatch = useDispatch<AppDispatch>();
+ const { categories = [], loading: categoriesLoading = false } = useSelector(
+    (state: RootState) => state.categories || {}
+  );
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
   const handleAddToCart = (productId: string) => {
     console.log(`Add product ${productId} to cart`);
     // TODO: Implement Redux dispatch for adding to cart
@@ -45,11 +58,11 @@ const HomePage = () => {
   return (
     <>
       <NextSeo
-        title="Home | My E-commerce Store"
-        description="Welcome to My E-commerce Store. Find the best products here."
+        title="Home | Shastik Fashions"
+        description="Welcome to Shastik Fashions. Find the best products here."
       />
       <HeroCarousel />
-      <CategorySection />
+      <CategorySection categories={categories} loading={categoriesLoading} />
 
       <section className="my-8">
         <h2 className="text-3xl font-bold text-center mb-6">New Arrivals</h2>

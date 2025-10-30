@@ -16,9 +16,15 @@ interface GetProductsResponse {
   limit: number;
 }
 
-export const getProducts = async (page: number = 1, limit: number = 10): Promise<GetProductsResponse> => {
+export const getProducts = async (page: number = 1, limit: number = 10, categoryId?: string): Promise<GetProductsResponse> => {
   try {
-    const response = await unauthApi.get<GetProductsResponse>(`/products?page=${page}&limit=${limit}`);
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    if (categoryId) {
+      params.append('category', categoryId);
+    }
+    const response = await unauthApi.get<GetProductsResponse>(`/products?${params.toString()}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);

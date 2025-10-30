@@ -77,7 +77,7 @@ const CheckoutPage = () => {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
           amount: orderData.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 means 50000 paise or ₹500.
           currency: orderData.currency,
-          name: "My E-commerce Store",
+          name: "Shastik Fashions",
           description: "Transaction for Order " + order.id,
           order_id: orderData.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
           handler: function (response: any) {
@@ -119,8 +119,8 @@ const CheckoutPage = () => {
   return (
     <>
       <NextSeo
-        title="Checkout | My E-commerce Store"
-        description="Complete your purchase on My E-commerce Store."
+        title="Checkout | Shastik Fashions"
+        description="Complete your purchase on Shastik Fashions."
       />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Checkout</h1>

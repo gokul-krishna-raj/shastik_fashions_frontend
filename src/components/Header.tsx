@@ -2,15 +2,31 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, Search, User, ShoppingCart, Home, Heart, X } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
+import { RootState } from '@/store';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [wishlistCount, setWishlistCount] = useState(3); // Dummy count
+  // TODO: Fetch wishlist count from API
+
+  const router = useRouter();
+  const { token } = useSelector((state: RootState) => state.user);
+
+  const handleNavigation = (path: string) => {
+    if (token) {
+      router.push(path);
+    } else {
+      router.push('/auth/login');
+    }
+  };
 
   const navLinks = [
     { href: '/', label: 'Home' },
-    { href: '/sarees', label: 'Sarees' },
+    { href: '/products', label: 'All Product' },
     { href: '/new-arrivals', label: 'New Arrivals' },
     { href: '/best-seller', label: 'Best Seller' },
     { href: '/contact', label: 'Contact Us' },
@@ -33,7 +49,7 @@ const Header = () => {
             <div className="hidden md:block">
               <Link href="/" className="block">
                 <Image
-                  src="/shastik_fahsio_logo_2.png"
+                  src="Images/shastik_fahsion_logo_new.png"
                   alt="Shastik Fashions Logo"
                   width={240}
                   height={80}
@@ -58,7 +74,7 @@ const Header = () => {
             <div className="md:hidden absolute left-1/2 -translate-x-1/2">
               <Link href="/" className="block">
                 <Image
-                  src="/shastik_fahsio_logo_2.png"
+                  src="Images/shastik_fahsion_logo_new.png"
                   alt="Shastik Fashions Logo"
                   width={160}
                   height={53}
@@ -90,13 +106,18 @@ const Header = () => {
               >
                 <Search size={24} />
               </button>
-              <Link
-                href="/wishlist"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-                aria-label="Wishlist"
+              <button
+                onClick={() => handleNavigation('/wishlist')}
+                className="text-gray-600 hover:text-gray-900 transition-colors relative"
+                aria-label="Wishlist items"
               >
                 <Heart size={24} />
-              </Link>
+                {wishlistCount > 0 && (
+                  <span className="hidden md:flex absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-pink-600 text-white text-xs px-1 rounded-full items-center justify-center min-w-[1rem] h-4">
+                    {wishlistCount}
+                  </span>
+                )}
+              </button>
               <Link
                 href="/auth/login"
                 className="text-gray-600 hover:text-gray-900 transition-colors"
@@ -104,16 +125,16 @@ const Header = () => {
               >
                 <User size={24} />
               </Link>
-              <Link
-                href="/cart"
+              <button
+                onClick={() => handleNavigation('/cart')}
                 className="text-gray-600 hover:text-gray-900 transition-colors relative"
                 aria-label="Shopping Cart"
               >
                 <ShoppingCart size={24} />
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                   3
                 </span>
-              </Link>
+              </button>
             </div>
 
             {/* Mobile User Icon */}
@@ -135,9 +156,8 @@ const Header = () => {
 
       {/* Mobile Side Menu Drawer */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
-          isMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:hidden`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:hidden`}
       >
         <div className="p-4">
           <button
@@ -242,26 +262,33 @@ const Header = () => {
             <Search size={24} />
             <span className="text-xs mt-1">Search</span>
           </button>
-          <Link
-            href="/wishlist"
+          <button
+            onClick={() => handleNavigation('/wishlist')}
             className="flex flex-col items-center justify-center flex-1 text-gray-600 hover:text-blue-600 transition-colors relative"
+            aria-label="Wishlist items"
           >
-            <Heart size={24} />
+            <div className="relative flex items-center justify-center">
+              <Heart size={24} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-pink-600 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </div>
             <span className="text-xs mt-1">Wishlist</span>
-            <span className="absolute top-1 right-6 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-              2
-            </span>
-          </Link>
-          <Link
-            href="/cart"
+          </button>
+
+          <button
+            onClick={() => handleNavigation('/cart')}
             className="flex flex-col items-center justify-center flex-1 text-gray-600 hover:text-blue-600 transition-colors relative"
+            aria-label="Shopping Cart"
           >
             <ShoppingCart size={24} />
             <span className="text-xs mt-1">Cart</span>
-            <span className="absolute top-1 right-6 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+            <span className="absolute top-1 right-6 bg-pink-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
               3
             </span>
-          </Link>
+          </button>
         </div>
       </nav>
 

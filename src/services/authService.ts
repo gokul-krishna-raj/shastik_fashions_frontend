@@ -8,14 +8,16 @@ interface LoginCredentials {
 
 interface RegisterCredentials extends LoginCredentials {
   name: string;
+  mobile: string;
 }
 
 interface AuthResponse {
   token: string;
-  user: {
+  data: {
     id: string;
     email: string;
     name: string;
+    mobile: string;
   };
 }
 
@@ -33,7 +35,7 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
 
 export const register = async (credentials: RegisterCredentials): Promise<AuthResponse> => {
   try {
-    const response = await unauthApi.post<AuthResponse>('/auth/register', credentials);
+    const response = await unauthApi.post<AuthResponse>('/auth/register', { ...credentials, role: "user" });
     // Optionally, save token to localStorage or Redux store here
     localStorage.setItem('authToken', response.data.token);
     return response.data;

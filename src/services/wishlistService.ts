@@ -10,7 +10,7 @@ interface WishlistItem {
 interface Wishlist {
   id: string;
   userId: string;
-  items: WishlistItem[];
+  data: WishlistItem[];
 }
 
 export const getWishlist = async (): Promise<Wishlist> => {

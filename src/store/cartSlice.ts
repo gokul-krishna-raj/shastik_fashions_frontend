@@ -13,14 +13,14 @@ interface CartItem {
 }
 
 interface CartState {
-  items: CartItem[];
+  data: CartItem[];
   total: number;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: CartState = {
-  items: [],
+  data: [],
   total: 0,
   status: 'idle',
   error: null,
@@ -32,7 +32,7 @@ export const fetchCart = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await cartService.getCart();
-      return response.items.map(item => ({
+      return response.data.map(item => ({
         id: item.productId, // Assuming productId is unique enough for UI key
         productId: item.productId,
         name: `Product ${item.productId}`, // Placeholder name

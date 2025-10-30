@@ -12,13 +12,13 @@ interface WishlistItem {
 }
 
 interface WishlistState {
-  items: WishlistItem[];
+  data: WishlistItem[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: WishlistState = {
-  items: [],
+  data: [],
   status: 'idle',
   error: null,
 };
@@ -29,7 +29,7 @@ export const fetchWishlist = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await wishlistService.getWishlist();
-      return response.items.map(item => ({
+      return response.data.map(item => ({
         id: item.productId, // Assuming productId is unique enough for UI key
         productId: item.productId,
         name: `Product ${item.productId}`, // Placeholder name

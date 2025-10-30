@@ -5,8 +5,8 @@ const AboutPage = () => {
   return (
     <>
       <NextSeo
-        title="About Us | My E-commerce Store"
-        description="Learn more about My E-commerce Store."
+        title="About Us | Shastik Fashions"
+        description="Learn more about Shastik Fashions."
       />
       <section>
         <h1 className="text-3xl font-bold">About Us</h1>

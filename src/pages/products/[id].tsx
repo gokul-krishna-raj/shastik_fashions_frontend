@@ -109,7 +109,7 @@ const ProductDetailsPage: React.FC<ProductDetailsProps> = ({ product, relatedPro
   return (
     <>
       <NextSeo
-        title={`${product.name} | My E-commerce Store`}
+        title={`${product.name} | Shastik Fashions`}
         description={product.description}
         openGraph={{
           title: product.name,
@@ -122,7 +122,7 @@ const ProductDetailsPage: React.FC<ProductDetailsProps> = ({ product, relatedPro
           product: {
             price: {
               amount: product.price.toFixed(2),
-              currency: 'USD',
+              currency: 'INR',
             },
             availability: product.stock > 0 ? 'instock' : 'outofstock',
           },
@@ -133,7 +133,7 @@ const ProductDetailsPage: React.FC<ProductDetailsProps> = ({ product, relatedPro
         title={product.name}
         images={product.images}
         datePublished={new Date().toISOString()}
-        authorName="My E-commerce Store"
+        authorName="Shastik Fashions"
         description={product.description}
       />
 

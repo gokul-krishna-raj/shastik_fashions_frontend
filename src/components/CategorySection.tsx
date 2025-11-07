@@ -3,12 +3,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useRef } from 'react';
 
-interface Category {
-  _id: string;
-  name: string;
-  description: string;
-  image: string;
-}
+import { Category } from '@/types';
 
 interface CategorySectionProps {
   categories: Category[];
@@ -71,7 +66,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ categories, loading }
             {categories.slice(0, 10).map((category) => (
               <Link
                 key={category._id}
-                href={`/categories/${category._id}`}
+                href={`/categories/${category.slug}`}
                 className="flex-shrink-0 w-32 sm:w-36 text-center group"
               >
                 <div className="relative w-32 h-32 sm:w-36 sm:h-36 mx-auto mb-4 shadow-md rounded-full overflow-hidden transition-transform duration-300 transform group-hover:scale-105 group-hover:shadow-xl">

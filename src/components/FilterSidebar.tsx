@@ -8,7 +8,6 @@ interface FilterSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   filters: SareeFilters;
-  onFilterChange: (newFilters: SareeFilters) => void;
   onApply: (filters: SareeFilters) => void;
   onClearAll: () => void;
 }
@@ -32,7 +31,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   isOpen,
   onClose,
   filters,
-  onFilterChange,
   onApply,
   onClearAll,
 }) => {
@@ -212,7 +210,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     step={100}
                     value={localFilters.priceRange}
                     onChange={handlePriceChange}
-                    onAfterChange={() => onFilterChange(localFilters)} // Apply changes after slider interaction
                     trackStyle={[{ backgroundColor: '#8A1538' }]}
                     handleStyle={[
                       { backgroundColor: '#C99A5E', borderColor: '#C99A5E', opacity: 1 },

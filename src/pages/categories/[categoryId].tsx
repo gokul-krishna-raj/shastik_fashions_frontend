@@ -13,9 +13,10 @@ const CategoryProductsPage = () => {
   const { categoryId } = router.query;
   const dispatch = useDispatch<AppDispatch>();
   const { items: products, status, sort, page, hasMore } = useSelector((state: RootState) => state.products);
+  const { token } = useSelector((state: RootState) => state.user);
+  const { categories } = useSelector((state: RootState) => state.categories);
 
-  // TODO: Fetch category name based on categoryId for the title and breadcrumb
-  const categoryName = categoryId ? `Category ${categoryId}` : 'Category';
+  const categoryName = categories.find((c) => c.slug === categoryId)?.name || (categoryId as string);
 
   const observer = useRef<IntersectionObserver>();
   const lastProductElementRef = useCallback(
@@ -34,16 +35,9 @@ const CategoryProductsPage = () => {
 
   useEffect(() => {
     if (categoryId) {
-      dispatch(resetProducts()); // Clear products when category changes
-      dispatch(fetchProducts({ page: 1, sort, append: false, categoryId: categoryId as string }));
+      dispatch(fetchProducts({ page, sort, append: page > 1, categoryId: categoryId as string }));
     }
-  }, [categoryId, dispatch, sort]);
-
-  useEffect(() => {
-    if (page > 1 && hasMore && status !== 'loading' && categoryId) {
-      dispatch(fetchProducts({ page, sort, append: true, categoryId: categoryId as string }));
-    }
-  }, [page, categoryId, dispatch, sort, hasMore, status]);
+  }, [categoryId, dispatch, sort, page]);
 
   const handleSortChange = useCallback((newSort: string) => {
     dispatch(setSort(newSort));
@@ -101,21 +95,23 @@ const CategoryProductsPage = () => {
             {products.map((product, index) => {
               if (products.length === index + 1) {
                 return (
-                  <div ref={lastProductElementRef} key={product.id}>
+                  <div ref={lastProductElementRef} key={product._id}>
                     <ProductCard
                       product={product}
                       onAddToCart={handleAddToCart}
                       onAddToWishlist={handleAddToWishlist}
+                      isLoggedIn={!!token}
                     />
                   </div>
                 );
               }
               return (
                 <ProductCard
-                  key={product.id}
+                  key={product._id}
                   product={product}
                   onAddToCart={handleAddToCart}
                   onAddToWishlist={handleAddToWishlist}
+                  isLoggedIn={!!token}
                 />
               );
             })}

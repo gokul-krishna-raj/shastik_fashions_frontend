@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { fetchProducts, setFilters, setSort, setPage, resetProducts } from '@/store/productsSlice';
+import { addToCart } from '@/store/cartSlice';
+import { addToWishlist } from '@/store/wishlistSlice';
 import ProductCard, { ProductCardSkeleton } from '@/components/ProductCard';
 import FilterSidebar from '@/components/FilterSidebar';
 import SortDropdown from '@/components/SortDropdown';
@@ -14,6 +16,7 @@ const ProductsPage = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { items: products, status, filters, sort, page, hasMore } = useSelector((state: RootState) => state.products);
+  const { token } = useSelector((state: RootState) => state.user);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -113,13 +116,19 @@ const ProductsPage = () => {
   }, [dispatch, filters]);
 
   const handleAddToCart = (productId: string) => {
-    console.log(`Add product ${productId} to cart`);
-    // TODO: Implement Redux dispatch for adding to cart
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+    dispatch(addToCart(productId));
   };
 
   const handleAddToWishlist = (productId: string) => {
-    console.log(`Add product ${productId} to wishlist`);
-    // TODO: Implement Redux dispatch for adding to wishlist
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+    dispatch(addToWishlist(productId));
   };
 
   return (
@@ -143,7 +152,6 @@ const ProductsPage = () => {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           filters={filters}
-          onFilterChange={setFilters} // This prop is no longer used directly for applying filters
           onApply={handleApplyFilters}
           onClearAll={handleClearAllFilters}
         />
@@ -156,24 +164,26 @@ const ProductsPage = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product, index) => {
-              if (products.length === index + 1) {
+            {(products || []).map((product, index) => {
+              if ((products || []).length === index + 1) {
                 return (
-                  <div ref={lastProductElementRef} key={product.id}>
+                  <div ref={lastProductElementRef} key={product._id}>
                     <ProductCard
                       product={product}
                       onAddToCart={handleAddToCart}
                       onAddToWishlist={handleAddToWishlist}
+                      isLoggedIn={!!token}
                     />
                   </div>
                 );
               }
               return (
                 <ProductCard
-                  key={product.id}
+                  key={product._id}
                   product={product}
                   onAddToCart={handleAddToCart}
                   onAddToWishlist={handleAddToWishlist}
+                  isLoggedIn={!!token}
                 />
               );
             })}

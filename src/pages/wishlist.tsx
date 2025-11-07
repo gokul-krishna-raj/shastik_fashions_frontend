@@ -12,6 +12,7 @@ const WishlistPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { data: wishlistItems, status, error } = useSelector((state: RootState) => state.wishlist);
+console.log("wishlistItems =>", wishlistItems);
 
   useEffect(() => {
     dispatch(fetchWishlist());
@@ -22,14 +23,14 @@ const WishlistPage = () => {
   };
 
   const handleMoveToCart = (item: {
-    productId: string;
+    _id: string;
     name: string;
     price: number;
-    imageUrl: string;
+    images: string;
     altText: string;
   }) => {
     dispatch(addToCart(item));
-    dispatch(removeFromWishlist(item.productId));
+    dispatch(removeFromWishlist(item._id));
   };
 
   if (status === 'loading' && wishlistItems.length === 0) {
@@ -62,11 +63,11 @@ const WishlistPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wishlistItems.length&&wishlistItems.map((item) => (
-              <div key={item.id} className="flex flex-col border rounded-lg shadow-md overflow-hidden bg-white">
+            {wishlistItems.length&&wishlistItems.map((item:any) => (
+              <div key={item._id} className="flex flex-col border rounded-lg shadow-md overflow-hidden bg-white">
                 <div className="relative w-full h-48">
                   <Image
-                    src={item.imageUrl}
+                    src={item.images[0]}
                     alt={item.altText}
                     layout="fill"
                     objectFit="cover"
@@ -84,7 +85,7 @@ const WishlistPage = () => {
                       <ShoppingCart size={16} className="mr-2" /> Move to Cart
                     </button>
                     <button
-                      onClick={() => handleRemoveItem(item.productId)}
+                      onClick={() => handleRemoveItem(item._id)}
                       className="flex items-center justify-center w-full sm:w-auto text-red-500 border border-red-500 px-4 py-2 rounded-md text-sm hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                       aria-label={`Remove ${item.name} from wishlist`}
                     >

@@ -3,12 +3,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import * as authService from '@/services/authService';
 import { getLocalStorageItem, getParsedLocalStorageItem } from '../lib/utils';
 
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  // Add other user profile properties as needed
-}
+import { User } from '@/types';
 
 interface UserState {
   token: string | null;
@@ -79,10 +74,10 @@ const userSlice = createSlice({
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action: PayloadAction<{ token: string; user: User }>) => {
+      .addCase(login.fulfilled, (state, action: PayloadAction<{ token: string; data: User }>) => {
         state.status = 'succeeded';
         state.token = action.payload.token;
-        state.profile = action.payload.user;
+        state.profile = action.payload.data;
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed';

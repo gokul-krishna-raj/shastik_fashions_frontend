@@ -1,17 +1,6 @@
 
 import { api } from './api';
-
-interface CartItem {
-  productId: string;
-  quantity: number;
-}
-
-interface Cart {
-  id: string;
-  userId: string;
-  items: CartItem[];
-  total: number;
-}
+import { Cart, CartItem } from '@/types';
 
 export const getCart = async (): Promise<Cart> => {
   try {
@@ -25,7 +14,7 @@ export const getCart = async (): Promise<Cart> => {
 
 export const addToCart = async (productId: string, quantity: number): Promise<Cart> => {
   try {
-    const response = await api.post<Cart>('/cart/add', { productId, quantity });
+    const response = await api.post<Cart>('/cart', { productId, quantity });
     return response.data;
   } catch (error) {
     console.error('Error adding to cart:', error);
@@ -45,7 +34,7 @@ export const updateCartItem = async (productId: string, quantity: number): Promi
 
 export const removeCartItem = async (productId: string): Promise<Cart> => {
   try {
-    const response = await api.delete<Cart>(`/cart/remove/${productId}`);
+    const response = await api.delete<Cart>(`/cart/${productId}`);
     return response.data;
   } catch (error) {
     console.error('Error removing cart item:', error);

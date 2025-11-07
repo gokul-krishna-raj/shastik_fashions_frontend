@@ -63,12 +63,12 @@ const CartPage = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center border-b py-4">
+              {cartItems.map((item:any) => (
+                <div key={item._id} className="flex items-center border-b py-4">
                   <div className="relative w-24 h-24 flex-shrink-0 mr-4">
                     <Image
-                      src={item.imageUrl}
-                      alt={item.altText}
+                      src={item.images[0]}
+                      alt={item.name}
                       layout="fill"
                       objectFit="cover"
                       className="rounded-md"
@@ -76,10 +76,10 @@ const CartPage = () => {
                   </div>
                   <div className="flex-1">
                     <h2 className="text-lg font-semibold">{item.name}</h2>
-                    <p className="text-gray-600">${item.price.toFixed(2)}</p>
+                    <p className="text-gray-600">₹{item.price.toFixed(2)}</p>
                     <div className="flex items-center mt-2">
                       <button
-                        onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
+                        onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
                         className="bg-gray-200 text-gray-700 px-3 py-1 rounded-l-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                         aria-label={`Decrease quantity of ${item.name}`}
                       >
@@ -87,14 +87,14 @@ const CartPage = () => {
                       </button>
                       <span className="bg-gray-100 px-4 py-1 text-center" aria-live="polite" aria-atomic="true">{item.quantity}</span>
                       <button
-                        onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
+                        onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
                         className="bg-gray-200 text-gray-700 px-3 py-1 rounded-r-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                         aria-label={`Increase quantity of ${item.name}`}
                       >
                         +
                       </button>
                       <button
-                        onClick={() => handleRemoveItem(item.productId)}
+                        onClick={() => handleRemoveItem(item._id)}
                         className="ml-4 text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                         aria-label={`Remove ${item.name} from cart`}
                       >
@@ -103,7 +103,7 @@ const CartPage = () => {
                     </div>
                   </div>
                   <div className="text-lg font-semibold">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ₹{(item.price * item.quantity).toFixed(2)}
                   </div>
                 </div>
               ))}
@@ -113,15 +113,15 @@ const CartPage = () => {
               <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
               <div className="flex justify-between text-lg mb-2">
                 <span>Subtotal:</span>
-                <span>${total.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold mb-6">
                 <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
               <button
                 onClick={handleProceedToCheckout}
-                className="w-full bg-primary text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                className="w-full bg-[#8A1538] text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 aria-label="Proceed to checkout"
               >
                 Proceed to Checkout

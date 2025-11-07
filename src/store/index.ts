@@ -4,6 +4,9 @@ import cartReducer from './cartSlice';
 import userReducer from './userSlice';
 import wishlistReducer from './wishlistSlice';
 import categoryReducer from './categorySlice';
+import homeReducer from './homeSlice';
+
+import productDetailsReducer from './productDetailsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,10 +15,10 @@ export const store = configureStore({
     user: userReducer,
     wishlist: wishlistReducer,
     categories: categoryReducer,
+    home: homeReducer,
+    productDetails: productDetailsReducer,
   },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
-export { StoreProvider } from '@/components/providers/StoreProvider';

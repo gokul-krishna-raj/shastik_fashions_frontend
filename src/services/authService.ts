@@ -1,31 +1,10 @@
 
 import { unauthApi } from './api';
-
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-interface RegisterCredentials extends LoginCredentials {
-  name: string;
-  mobile: string;
-}
-
-interface AuthResponse {
-  token: string;
-  data: {
-    id: string;
-    email: string;
-    name: string;
-    mobile: string;
-  };
-}
+import { LoginCredentials, RegisterCredentials, AuthResponse } from '@/types';
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   try {
     const response = await unauthApi.post<AuthResponse>('/auth/login', credentials);
-    // Optionally, save token to localStorage or Redux store here
-    localStorage.setItem('authToken', response.data.token);
     return response.data;
   } catch (error) {
     console.error('Error during login:', error);
@@ -36,8 +15,6 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
 export const register = async (credentials: RegisterCredentials): Promise<AuthResponse> => {
   try {
     const response = await unauthApi.post<AuthResponse>('/auth/register', { ...credentials, role: "user" });
-    // Optionally, save token to localStorage or Redux store here
-    localStorage.setItem('authToken', response.data.token);
     return response.data;
   } catch (error) {
     console.error('Error during registration:', error);

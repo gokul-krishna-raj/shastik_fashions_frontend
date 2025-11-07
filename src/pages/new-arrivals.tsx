@@ -80,6 +80,7 @@ const NewArrivalsPage = () => {
     console.log(`Add product ${productId} to wishlist`);
     // TODO: Implement Redux dispatch for adding to wishlist
   };
+console.log("products =>",products);
 
   return (
     <>

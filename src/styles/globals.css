@@ -5,7 +5,9 @@
 :root {
   --background: #f5f5dc; /* Light beige */
   --foreground: #333333;
-  --primary: #a0522d; /* Sienna */
+  --primary: #8a1538; /* Maroon */
+  --primary-dark: #6b102c; /* Darker Maroon */
+  --primary-light: #a91a44; /* Lighter Maroon */
   --primary-foreground: #ffffff;
   --card: #ffffff;
   --card-foreground: #333333;

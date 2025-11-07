@@ -25,7 +25,7 @@ export const getWishlist = async (): Promise<Wishlist> => {
 
 export const addToWishlist = async (productId: string): Promise<Wishlist> => {
   try {
-    const response = await api.post<Wishlist>('/wishlist/add', { productId });
+    const response = await api.post<Wishlist>('/wishlist', { productId });
     return response.data;
   } catch (error) {
     console.error('Error adding to wishlist:', error);
@@ -35,7 +35,7 @@ export const addToWishlist = async (productId: string): Promise<Wishlist> => {
 
 export const removeFromWishlist = async (productId: string): Promise<Wishlist> => {
   try {
-    const response = await api.delete<Wishlist>(`/wishlist/remove/${productId}`);
+    const response = await api.delete<Wishlist>(`/wishlist/${productId}`);
     return response.data;
   } catch (error) {
     console.error('Error removing from wishlist:', error);

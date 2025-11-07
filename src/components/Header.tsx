@@ -1,27 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, Search, User, ShoppingCart, Home, Heart, X } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
-import { RootState } from '@/store';
+import { RootState, AppDispatch } from '@/store';
+import { fetchCart } from '@/store/cartSlice';
+import { fetchWishlist } from '@/store/wishlistSlice';
+import { clearAuthData } from '@/store/userSlice';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [wishlistCount, setWishlistCount] = useState(3); // Dummy count
-  // TODO: Fetch wishlist count from API
+  const [isSearchOpen, setIsSearchOpen] = useState('');
+  const [isClient, setIsClient] = useState(false); // New state for client-side rendering check
 
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const { token } = useSelector((state: RootState) => state.user);
+  const cartItems = useSelector((state: RootState) => state.cart.data);
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.data);
+
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const wishlistCount = wishlistItems.length;
+
+  useEffect(() => {
+    setIsClient(true); // Set to true once component mounts on client
+    dispatch(fetchCart());
+    dispatch(fetchWishlist());
+  }, [dispatch]);
 
   const handleNavigation = (path: string) => {
     if (token) {
       router.push(path);
-    } else {
+    }
+    else {
       router.push('/auth/login');
     }
+  };
+
+  const handleLogout = () => {
+    dispatch(clearAuthData());
+    router.push('/');
   };
 
   const navLinks = [
@@ -112,41 +131,65 @@ const Header = () => {
                 aria-label="Wishlist items"
               >
                 <Heart size={24} />
-                {wishlistCount > 0 && (
+                {isClient && wishlistCount > 0 && (
                   <span className="hidden md:flex absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-pink-600 text-white text-xs px-1 rounded-full items-center justify-center min-w-[1rem] h-4">
                     {wishlistCount}
                   </span>
                 )}
               </button>
-              <Link
-                href="/auth/login"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-                aria-label="Account"
-              >
-                <User size={24} />
-              </Link>
+              {isClient && token ? (
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  aria-label="Logout"
+                >
+                  <User size={24} />
+                </button>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  aria-label="Account"
+                >
+                  <User size={24} />
+                </Link>
+              )}
               <button
                 onClick={() => handleNavigation('/cart')}
                 className="text-gray-600 hover:text-gray-900 transition-colors relative"
                 aria-label="Shopping Cart"
               >
                 <ShoppingCart size={24} />
-                <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                  3
-                </span>
+                {isClient && cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
               </button>
             </div>
 
             {/* Mobile User Icon */}
-            <div className="md:hidden">
+          <div className="md:hidden">
+            {isClient && token ? (
+              <button
+                onClick={handleLogout}
+                className="flex flex-col items-center justify-center flex-1 text-gray-600 hover:text-blue-600 transition-colors"
+                aria-label="Logout"
+              >
+                <User size={24} />
+                <span className="text-xs mt-1">Logout</span>
+              </button>
+            ) : (
               <Link
                 href="/auth/login"
-                className="text-gray-600 hover:text-gray-900"
+                className="flex flex-col items-center justify-center flex-1 text-gray-600 hover:text-blue-600 transition-colors"
                 aria-label="Account"
               >
                 <User size={24} />
+                <span className="text-xs mt-1">Account</span>
               </Link>
-            </div>
+            )}
+          </div>
           </div>
         </div>
       </header>
@@ -178,6 +221,17 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
+            {token && (
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="text-gray-700 hover:text-gray-900 text-lg font-medium py-2 w-full text-left"
+              >
+                Logout
+              </button>
+            )}
           </nav>
         </div>
       </div>
@@ -269,7 +323,7 @@ const Header = () => {
           >
             <div className="relative flex items-center justify-center">
               <Heart size={24} />
-              {wishlistCount > 0 && (
+              {isClient && wishlistCount > 0 && (
                 <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-pink-600 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center">
                   {wishlistCount}
                 </span>
@@ -285,9 +339,11 @@ const Header = () => {
           >
             <ShoppingCart size={24} />
             <span className="text-xs mt-1">Cart</span>
-            <span className="absolute top-1 right-6 bg-pink-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-              3
-            </span>
+            {isClient && cartCount > 0 && (
+              <span className="absolute top-1 right-6 bg-pink-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
           </button>
         </div>
       </nav>

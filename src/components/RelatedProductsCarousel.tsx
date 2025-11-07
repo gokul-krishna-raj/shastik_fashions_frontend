@@ -2,13 +2,9 @@
 import React from 'react';
 import ProductCard from './ProductCard';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  imageUrl: string;
-  altText: string;
-}
+import { Product } from '@/types';
+
+import { useAppSelector } from '@/store/hooks';
 
 interface RelatedProductsCarouselProps {
   products: Product[];
@@ -21,6 +17,8 @@ const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = ({
   onAddToCart,
   onAddToWishlist,
 }) => {
+  const { token } = useAppSelector((state) => state.user);
+
   if (!products || products.length === 0) {
     return null; // Don't render if no related products
   }
@@ -31,10 +29,11 @@ const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-x-auto">
         {products.map((product) => (
           <ProductCard
-            key={product.id}
+            key={product._id}
             product={product}
             onAddToCart={onAddToCart}
             onAddToWishlist={onAddToWishlist}
+            isLoggedIn={!!token}
           />
         ))}
       </div>

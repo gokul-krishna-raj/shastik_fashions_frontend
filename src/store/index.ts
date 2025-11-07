@@ -5,6 +5,7 @@ import userReducer from './userSlice';
 import wishlistReducer from './wishlistSlice';
 import categoryReducer from './categorySlice';
 import homeReducer from './homeSlice';
+import searchReducer from './searchSlice';
 
 import productDetailsReducer from './productDetailsSlice';
 
@@ -16,6 +17,7 @@ export const store = configureStore({
     wishlist: wishlistReducer,
     categories: categoryReducer,
     home: homeReducer,
+    search: searchReducer,
     productDetails: productDetailsReducer,
   },
 });

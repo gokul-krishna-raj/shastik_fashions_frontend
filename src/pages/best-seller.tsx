@@ -7,10 +7,14 @@ import { fetchProducts, setSort, setPage, resetProducts } from '@/store/products
 import ProductCard, { ProductCardSkeleton } from '@/components/ProductCard';
 import SortDropdown from '@/components/SortDropdown';
 
+import { addToCart } from '@/store/cartSlice';
+import { addToWishlist } from '@/store/wishlistSlice';
+
 const BestSellerPage = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { items: products, status, filters, sort, page, hasMore } = useSelector((state: RootState) => state.products);
+  const { token } = useSelector((state: RootState) => state.user);
 
   const observer = useRef<IntersectionObserver>();
   const lastProductElementRef = useCallback(
@@ -72,13 +76,19 @@ const BestSellerPage = () => {
   }, [dispatch]);
 
   const handleAddToCart = (productId: string) => {
-    console.log(`Add product ${productId} to cart`);
-    // TODO: Implement Redux dispatch for adding to cart
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+    dispatch(addToCart(productId));
   };
 
   const handleAddToWishlist = (productId: string) => {
-    console.log(`Add product ${productId} to wishlist`);
-    // TODO: Implement Redux dispatch for adding to wishlist
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+    dispatch(addToWishlist(productId));
   };
 
   return (
@@ -98,21 +108,23 @@ const BestSellerPage = () => {
             {products.map((product, index) => {
               if (products.length === index + 1) {
                 return (
-                  <div ref={lastProductElementRef} key={product.id}>
+                  <div ref={lastProductElementRef} key={product._id}>
                     <ProductCard
                       product={product}
                       onAddToCart={handleAddToCart}
                       onAddToWishlist={handleAddToWishlist}
+                      isLoggedIn={!!token}
                     />
                   </div>
                 );
               }
               return (
                 <ProductCard
-                  key={product.id}
+                  key={product._id}
                   product={product}
                   onAddToCart={handleAddToCart}
                   onAddToWishlist={handleAddToWishlist}
+                  isLoggedIn={!!token}
                 />
               );
             })}

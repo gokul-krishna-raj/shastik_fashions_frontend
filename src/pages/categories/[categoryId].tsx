@@ -8,6 +8,9 @@ import ProductCard, { ProductCardSkeleton } from '@/components/ProductCard';
 import SortDropdown from '@/components/SortDropdown';
 import Link from 'next/link';
 
+import { addToCart } from '@/store/cartSlice';
+import { addToWishlist } from '@/store/wishlistSlice';
+
 const CategoryProductsPage = () => {
   const router = useRouter();
   const { categoryId } = router.query;
@@ -46,13 +49,19 @@ const CategoryProductsPage = () => {
   }, [dispatch, categoryId]);
 
   const handleAddToCart = (productId: string) => {
-    console.log(`Add product ${productId} to cart`);
-    // TODO: Implement Redux dispatch for adding to cart
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+    dispatch(addToCart(productId));
   };
 
   const handleAddToWishlist = (productId: string) => {
-    console.log(`Add product ${productId} to wishlist`);
-    // TODO: Implement Redux dispatch for adding to wishlist
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+    dispatch(addToWishlist(productId));
   };
 
   return (

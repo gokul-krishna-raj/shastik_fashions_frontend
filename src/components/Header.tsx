@@ -8,10 +8,13 @@ import { RootState, AppDispatch } from '@/store';
 import { fetchCart } from '@/store/cartSlice';
 import { fetchWishlist } from '@/store/wishlistSlice';
 import { clearAuthData } from '@/store/userSlice';
+import { useDebounce } from '@/hooks/use-debounce';
+import { searchProducts, clearSearchResults } from '@/store/searchSlice';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isClient, setIsClient] = useState(false); // New state for client-side rendering check
 
   const router = useRouter();
@@ -19,6 +22,9 @@ const Header = () => {
   const { token } = useSelector((state: RootState) => state.user);
   const cartItems = useSelector((state: RootState) => state.cart.data);
   const wishlistItems = useSelector((state: RootState) => state.wishlist.data);
+  const { results: searchResults, status: searchStatus } = useSelector((state: RootState) => state.search);
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
@@ -28,6 +34,14 @@ const Header = () => {
     dispatch(fetchCart());
     dispatch(fetchWishlist());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      dispatch(searchProducts(debouncedSearchQuery));
+    } else {
+      dispatch(clearSearchResults());
+    }
+  }, [debouncedSearchQuery, dispatch]);
 
   const handleNavigation = (path: string) => {
     if (token) {
@@ -53,9 +67,10 @@ const Header = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Searching for:', searchQuery);
-    // Add your search logic here
-    setIsSearchOpen(false);
+    if (searchQuery) {
+      router.push(`/products?search=${searchQuery}`);
+      setIsSearchOpen(false);
+    }
   };
 
   return (
@@ -68,7 +83,7 @@ const Header = () => {
             <div className="hidden md:block">
               <Link href="/" className="block">
                 <Image
-                  src="Images/shastik_fahsion_logo_new.png"
+                  src="/Images/shastik_fahsion_logo_new.png"
                   alt="Shastik Fashions Logo"
                   width={240}
                   height={80}
@@ -93,7 +108,7 @@ const Header = () => {
             <div className="md:hidden absolute left-1/2 -translate-x-1/2">
               <Link href="/" className="block">
                 <Image
-                  src="Images/shastik_fahsion_logo_new.png"
+                  src="/Images/shastik_fahsion_logo_new.png"
                   alt="Shastik Fashions Logo"
                   width={160}
                   height={53}
@@ -221,7 +236,7 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            {token && (
+            {isClient && token && (
               <button
                 onClick={() => {
                   handleLogout();
@@ -251,7 +266,11 @@ const Header = () => {
             <div className="p-4 border-b flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Search Products</h3>
               <button
-                onClick={() => setIsSearchOpen(false)}
+                onClick={() => {
+                  setIsSearchOpen(false);
+                  setSearchQuery('');
+                  dispatch(clearSearchResults());
+                }}
                 className="text-gray-500 hover:text-gray-900"
                 aria-label="Close search"
               >
@@ -277,23 +296,41 @@ const Header = () => {
                 Search
               </button>
             </form>
-            {/* Recent Searches or Suggestions */}
-            <div className="p-4 border-t">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Popular Searches</h4>
-              <div className="flex flex-wrap gap-2">
-                {['Silk Sarees', 'Cotton Sarees', 'Designer Sarees', 'Wedding Collection'].map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => {
-                      setSearchQuery(tag);
-                      handleSearch(new Event('submit') as any);
-                    }}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
+            {/* Search Results */}
+            <div className="p-4 border-t max-h-60 overflow-y-auto">
+              {searchStatus === 'loading' && <p className="text-center">Loading...</p>}
+              {searchStatus === 'failed' && <p className="text-center text-red-500">Error searching products.</p>}
+              {searchStatus === 'succeeded' && searchResults.length === 0 && debouncedSearchQuery && (
+                <p className="text-center">No results found for "{debouncedSearchQuery}"</p>
+              )}
+              {searchStatus === 'succeeded' && searchResults.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Search Results</h4>
+                  <ul className="space-y-2">
+                    {searchResults.map((product) => (
+                      <li key={product._id}>
+                        <Link 
+                          href={`/products/${product._id}`} 
+                          onClick={() => setIsSearchOpen(false)}
+                          className="flex items-center space-x-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <Image 
+                            src={product.images[0] || '/Images/placeholder.png'} 
+                            alt={product.name} 
+                            width={48} 
+                            height={48} 
+                            className="rounded-md object-cover"
+                          />
+                          <div>
+                            <p className="font-medium text-gray-800">{product.name}</p>
+                            <p className="text-sm text-gray-600">${product.price}</p>
+                          </div>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>

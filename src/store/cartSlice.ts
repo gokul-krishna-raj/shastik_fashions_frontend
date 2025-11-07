@@ -61,7 +61,7 @@ export const updateCartItemQuantity = createAsyncThunk(
   'cart/updateCartItemQuantity',
   async ({ productId, quantity }: { productId: string; quantity: number }, { dispatch, rejectWithValue }) => {
     try {
-      await cartService.updateCartItem(productId, quantity);
+      await cartService.addToCart(productId, quantity);
       dispatch(fetchCart());
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);

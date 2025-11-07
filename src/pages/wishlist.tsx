@@ -29,7 +29,7 @@ console.log("wishlistItems =>", wishlistItems);
     images: string;
     altText: string;
   }) => {
-    dispatch(addToCart(item));
+    dispatch(addToCart(item._id));
     dispatch(removeFromWishlist(item._id));
   };
 

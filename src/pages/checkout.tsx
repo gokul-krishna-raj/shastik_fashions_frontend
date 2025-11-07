@@ -43,7 +43,7 @@ const CheckoutPage = () => {
   }, [dispatch, cartStatus]);
 
   const onSubmit = async (data: FormData) => {
-    if (cartItems.length === 0) {
+    if (cartItems?.length === 0) {
       alert('Your cart is empty. Please add items before checking out.');
       return;
     }
@@ -174,7 +174,7 @@ const CheckoutPage = () => {
               <button
                 type="submit"
                 className="w-full bg-primary text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                disabled={isProcessingOrder || cartStatus === 'loading' || cartItems.length === 0}
+                disabled={isProcessingOrder || cartStatus === 'loading' || cartItems?.length === 0}
                 aria-label="Place order and proceed to payment"
               >
                 {isProcessingOrder ? 'Processing...' : 'Place Order & Pay'}
@@ -185,14 +185,14 @@ const CheckoutPage = () => {
           {/* Order Summary */}
           <div className="lg:col-span-1 bg-gray-50 p-6 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
-            {cartItems.length === 0 ? (
+            {cartItems?.length === 0 ? (
               <p className="text-gray-600">No items in cart.</p>
             ) : (
               <div className="space-y-2 mb-4">
-                {cartItems.map((item) => (
+                {cartItems?.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span>{item.name} (x{item.quantity})</span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -200,7 +200,7 @@ const CheckoutPage = () => {
             <div className="border-t border-gray-200 pt-4 mt-4">
               <div className="flex justify-between text-lg font-bold">
                 <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
             </div>
           </div>

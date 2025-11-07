@@ -79,6 +79,16 @@ export const getNewArrivals = async (): Promise<Product[]> => {
   }
 };
 
+export const searchProducts = async (query: string): Promise<Product[]> => {
+  try {
+    const response = await unauthApi.get<{ data: Product[] }>(`/products?search=${query}`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error searching products:', error);
+    throw error;
+  }
+};
+
 /*
 Example Usage:
 

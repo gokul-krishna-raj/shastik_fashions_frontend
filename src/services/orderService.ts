@@ -1,24 +1,29 @@
 
 import { api } from './api';
 
-interface OrderItem {
-  productId: string;
+interface OrderProduct {
+  product: string; // Product ID
   quantity: number;
-  price: number;
 }
 
 interface Order {
-  id: string;
-  userId: string;
-  items: OrderItem[];
-  total: number;
-  status: string;
-  createdAt: string;
+  id?: string; // Optional for new orders
+  userId?: string; // Optional, can be derived from auth
+  products: OrderProduct[];
+  totalAmount: number;
+  paymentStatus: string; // e.g., "paid", "pending", "failed"
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
+  shippingAddress?: string; // Address ID
+  status?: string; // e.g., "pending", "processing", "shipped", "delivered"
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export const createOrder = async (items: { productId: string; quantity: number }[]): Promise<Order> => {
+export const createOrder = async (orderPayload: Omit<Order, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<Order> => {
   try {
-    const response = await api.post<Order>('/orders', { items });
+    const response = await api.post<Order>('/orders/confirm', orderPayload);
     return response.data;
   } catch (error) {
     console.error('Error creating order:', error);

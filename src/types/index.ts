@@ -14,7 +14,7 @@ export interface Product {
     description: string;
     originalPrice: number;
     price: number;
-    category: string;
+    category: any;
     images: string[];
     fabric: string;
     color: string;
@@ -55,11 +55,31 @@ export interface RegisterCredentials extends LoginCredentials {
 }
 
 export interface AuthResponse {
-  token: string;
+  accessToken: string;
   data: {
     id: string;
     email: string;
     name: string;
     mobile: string;
   };
+}
+
+
+export interface Address {
+  id?: string; // Making id optional for new addresses
+  _id?: string; // Assuming _id might also be used by the backend
+  user?: string; // User ID associated with the address
+  fullName: string;
+  phone: string;
+  email?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+  addressType: 'Home' | 'Work';
+  isDefault?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }

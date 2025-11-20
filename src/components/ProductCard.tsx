@@ -22,6 +22,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const router = useRouter();
   const { _id, name, price, originalPrice, images, category } = product;
+  console.log('category', category);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();

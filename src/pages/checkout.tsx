@@ -1,213 +1,311 @@
-import React, { useEffect } from 'react';
-import { NextSeo } from 'next-seo';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+'use client';
+
+import React, { useEffect, useState, useCallback } from 'react';
+import MainLayout from '@/layouts/MainLayout';
+import CheckoutAddressSelector from '@/components/address/CheckoutAddressSelector';
+import { Button } from '@/components/ui/button';
 import { useSelector, useDispatch } from 'react-redux';
-import { AppDispatch, RootState } from '@/store';
-import { fetchCart, clearCart } from '@/store/cartSlice';
-import { createOrder } from '@/services/orderService';
-import { useRouter } from 'next/router';
-import useAuth from '@/hooks/useAuth';
+import { RootState, AppDispatch } from '@/store';
+import { Address } from '@/types';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { fetchAddresses } from '@/store/addressSlice';
+import { createOrder } from '@/services/orderService'; // Import createOrder
+import axios from 'axios';
+import { createPaymentOrder } from '@/lib/api'; // Import the new backend function
 
-interface FormData {
-  name: string;
-  phone: string;
-  address: string;
-  pincode: string;
-}
+// Define shipping charges based on state
+const SHIPPING_CHARGES_BY_STATE: { [key: string]: number } = {
+  "Tamil Nadu": 40,
+  "Kerala": 50,
+  "Karnataka": 60,
+  "Andhra Pradesh": 55,
+  "Telangana": 55,
+  // Add more states as needed
+};
 
-const schema = yup.object().shape({
-  name: yup.string().required('Full Name is required'),
-  phone: yup.string().matches(/^\d{10}$/, 'Phone number must be 10 digits').required('Phone Number is required'),
-  address: yup.string().required('Address is required'),
-  pincode: yup.string().matches(/^\d{6}$/, 'Pincode must be 6 digits').required('Pincode is required'),
-});
+const DEFAULT_SHIPPING_CHARGE = 80; // Default for states not listed
 
-const CheckoutPage = () => {
-  useAuth(); // Protect this page
+// Placeholder for Razorpay Key ID - IMPORTANT: Replace 'rzp_test_YOUR_KEY_ID' with your actual Razorpay test key from environment variables or directly.
+const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY_ID';
 
-  const dispatch = useDispatch<AppDispatch>();
+export default function CheckoutPage() {
   const router = useRouter();
-  const { items: cartItems, total, status: cartStatus } = useSelector((state: RootState) => state.cart);
-  const [isProcessingOrder, setIsProcessingOrder] = React.useState(false);
+  const { toast } = useToast();
+  const dispatch = useDispatch<AppDispatch>();
+  const { addresses, selectedAddressId, status, error } = useSelector((state: RootState) => state.address);
+  const cartItems = useSelector((state: RootState) => state.cart.data); // Assuming cart data is here
+  const user = useSelector((state: RootState) => state.user.user); // Assuming user data is here
+  const [shippingCharge, setShippingCharge] = useState<number>(0);
+  const [pincodeStatus, setPincodeStatus] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
-    resolver: yupResolver(schema),
-  });
+  const selectedAddress = addresses.find(addr => addr.id === selectedAddressId || addr._id === selectedAddressId);
 
+  // Calculate product subtotal
+  const productSubtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Fetch addresses on component mount
   useEffect(() => {
-    if (cartStatus === 'idle') {
-      dispatch(fetchCart());
+    if (status === 'idle') {
+      dispatch(fetchAddresses());
     }
-  }, [dispatch, cartStatus]);
+  }, [status, dispatch]);
 
-  const onSubmit = async (data: FormData) => {
-    if (cartItems?.length === 0) {
-      alert('Your cart is empty. Please add items before checking out.');
+  // Handle error toasts for address fetching
+  useEffect(() => {
+    if (status === 'failed' && error) {
+      toast({
+        title: 'Error',
+        description: error || 'Failed to load addresses for checkout.',
+        variant: 'destructive',
+      });
+    }
+  }, [status, error, toast]);
+
+  // Function to fetch state from pincode API
+  const fetchStateFromPincode = useCallback(async (pincode: string) => {
+    setPincodeStatus('loading');
+    try {
+      const response = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`);
+      if (response.data && response.data[0] && response.data[0].Status === 'Success') {
+        const state = response.data[0].PostOffice[0].State;
+        setPincodeStatus('succeeded');
+        return state;
+      } else {
+        setPincodeStatus('failed');
+        toast({
+          title: 'Error',
+          description: 'Could not find state for the given pincode.',
+          variant: 'destructive',
+        });
+        return null;
+      }
+    } catch (err) {
+      setPincodeStatus('failed');
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch pincode details.',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  }, [toast]);
+
+  // Calculate shipping charge when selected address changes
+  useEffect(() => {
+    const calculateShipping = async () => {
+      if (selectedAddress && selectedAddress.pincode) {
+        const state = await fetchStateFromPincode(selectedAddress.pincode);
+        if (state) {
+          setShippingCharge(SHIPPING_CHARGES_BY_STATE[state] || DEFAULT_SHIPPING_CHARGE);
+        } else {
+          setShippingCharge(DEFAULT_SHIPPING_CHARGE); // Fallback if state not found
+        }
+      } else {
+        setShippingCharge(0); // No address selected or no pincode
+      }
+    };
+    calculateShipping();
+  }, [selectedAddress, fetchStateFromPincode]);
+
+  const totalAmount = productSubtotal + shippingCharge;
+
+  // Load Razorpay SDK script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+
+// ... (rest of the file)
+
+  const displayRazorpay = useCallback(async (orderId: string) => {
+    const options = {
+      key: RAZORPAY_KEY_ID,
+      amount: Number((totalAmount * 100).toFixed(0)), // amount in smallest currency unit (paise), ensure it's a number
+      currency: 'INR',
+      name: 'Shastik Fashions',
+      description: 'Order Payment',
+      image: '/Images/shastik_fahsion_logo_new.png', // Your company logo
+      order_id: orderId,
+      handler: async function (response: any) {
+        console.log('Razorpay Payment Response:', response);
+        try {
+          console.log("cartItems =>", cartItems);
+          
+          // Construct the order payload
+          const orderPayload:any = {
+            products: cartItems.map(item => ({
+              product: item._id, // Assuming item.productId exists
+              quantity: item.quantity,
+            })),
+            totalAmount: totalAmount,
+            paymentStatus: 'paid',
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+            shippingAddress: selectedAddressId, // Pass the selected address ID
+            // Add other relevant order details like user ID if available
+          };
+
+          // Call your backend to create the order
+          const createdOrder:any = await createOrder(orderPayload);
+          console.log('Order created successfully:', createdOrder);
+          toast({
+            title: 'Payment Successful',
+            description: `Order ID: ${createdOrder.id || createdOrder.id}`,
+          });
+          router.push(`/order-confirmation?orderId=${createdOrder.data.orderId || createdOrder.orderId}`);
+        } catch (err: any) {
+          console.error('Error creating order after payment:', err);
+          toast({
+            title: 'Order Creation Failed',
+            description: err.message || 'Failed to create order after successful payment.',
+            variant: 'destructive',
+          });
+          // Optionally, you might want to refund the payment if order creation fails
+        } finally {
+          setIsProcessingPayment(false);
+        }
+      },
+      prefill: {
+        name: user?.name || selectedAddress?.fullName || '',
+        email: user?.email || selectedAddress?.email || '',
+        contact: selectedAddress?.phone || '',
+      },
+      notes: {
+        address: selectedAddress?.addressLine1,
+        orderId: orderId,
+      },
+      theme: {
+        color: '#3399cc',
+      },
+    };
+
+    const paymentObject = new (window as any).Razorpay(options);
+    paymentObject.on('payment.failed', function (response: any) {
+      console.error('Razorpay Payment Failed:', response);
+      toast({
+        title: 'Payment Failed',
+        description: response.error.description || 'Something went wrong with payment.',
+        variant: 'destructive',
+      });
+      setIsProcessingPayment(false);
+    });
+    paymentObject.open();
+  }, [totalAmount, selectedAddress, user, router, toast]);
+
+
+// ... (imports and component setup)
+
+// ... (inside CheckoutPage component)
+
+  const handleConfirmOrder = async () => {
+    if (!selectedAddressId) {
+      toast({
+        title: 'Error',
+        description: 'Please select an address to confirm your order.',
+        variant: 'destructive',
+      });
       return;
     }
 
-    setIsProcessingOrder(true);
+    setIsProcessingPayment(true);
+     console.log("cartItems =>",cartItems);
+     
     try {
-      const orderItems = cartItems.map(item => ({
-        productId: item.productId,
+      // Step 1: Create order on your backend
+      const products = cartItems.map(item => ({
+        product: item._id, // Ensure this is the correct product ID field
         quantity: item.quantity,
       }));
-      const order = await createOrder(orderItems);
-      console.log('Order created:', order);
 
-      // TODO: Integrate Razorpay here
-      /*
-        // Example Razorpay integration flow:
-        const response = await fetch('/api/payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            amount: total * 100, // Razorpay expects amount in paisa
-            currency: 'INR',
-            receipt: order.id,
-          }),
+      const orderResponse = await createPaymentOrder(totalAmount, products);
+
+      if (orderResponse && orderResponse.orderId) {
+        // Step 2: Open Razorpay checkout
+        await displayRazorpay(orderResponse.orderId);
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to create Razorpay order.',
+          variant: 'destructive',
         });
-        const orderData = await response.json();
-
-        const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
-          amount: orderData.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 means 50000 paise or ₹500.
-          currency: orderData.currency,
-          name: "Shastik Fashions",
-          description: "Transaction for Order " + order.id,
-          order_id: orderData.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-          handler: function (response: any) {
-            alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
-            // Verify payment on your backend
-            // fetch('/api/payment/verify', { method: 'POST', body: JSON.stringify({ ...response, orderId: order.id }) });
-            dispatch(clearCart());
-            router.push('/order-success');
-          },
-          prefill: {
-            name: data.name,
-            contact: data.phone,
-          },
-          notes: {
-            address: data.address,
-            pincode: data.pincode,
-          },
-          theme: {
-            color: "#a0522d"
-          }
-        };
-        const rzp1 = new (window as any).Razorpay(options);
-        rzp1.open();
-        rzp1.on('payment.failed', function (response: any) {
-          alert("Payment Failed: " + response.error.code + " - " + response.error.description);
-        });
-      */
-
-      dispatch(clearCart());
-      router.push('/order-success'); // Redirect to a success page after order creation
-    } catch (error) {
-      console.error('Error during checkout:', error);
-      alert('Failed to place order. Please try again.');
-    } finally {
-      setIsProcessingOrder(false);
+        setIsProcessingPayment(false);
+      }
+    } catch (err) {
+      console.error('Error during order confirmation:', err);
+      toast({
+        title: 'Error',
+        description: 'An error occurred during order processing.',
+        variant: 'destructive',
+      });
+      setIsProcessingPayment(false);
     }
   };
 
   return (
-    <>
-      <NextSeo
-        title="Checkout | Shastik Fashions"
-        description="Complete your purchase on Shastik Fashions."
-      />
-      <div className="container mx-auto px-4 py-8">
+    <MainLayout>
+      <div className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-6">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Shipping Information Form */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4">Shipping Information</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  {...register('name')}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                />
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-              </div>
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  {...register('phone')}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                />
-                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
-              </div>
-              <div>
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
-                <textarea
-                  id="address"
-                  {...register('address')}
-                  rows={3}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                ></textarea>
-                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>}
-              </div>
-              <div>
-                <label htmlFor="pincode" className="block text-sm font-medium text-gray-700">Pincode</label>
-                <input
-                  type="text"
-                  id="pincode"
-                  {...register('pincode')}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                />
-                {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode.message}</p>}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-primary text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                disabled={isProcessingOrder || cartStatus === 'loading' || cartItems?.length === 0}
-                aria-label="Place order and proceed to payment"
-              >
-                {isProcessingOrder ? 'Processing...' : 'Place Order & Pay'}
-              </button>
-            </form>
+          <div className="lg:col-span-2">
+            <h2 className="text-2xl font-semibold mb-4">Select Delivery Address</h2>
+            <CheckoutAddressSelector />
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1 bg-gray-50 p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
-            {cartItems?.length === 0 ? (
-              <p className="text-gray-600">No items in cart.</p>
-            ) : (
-              <div className="space-y-2 mb-4">
-                {cartItems?.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span>{item.name} (x{item.quantity})</span>
-                    <span>₹{(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
+          <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
+            {selectedAddress ? (
+              <div className="mb-4">
+                <h3 className="font-medium">Shipping to:</h3>
+                <p className="text-gray-700">{selectedAddress.fullName}</p>
+                <p className="text-gray-700">{selectedAddress.addressLine1}</p>
+                {selectedAddress.addressLine2 && <p className="text-gray-700">{selectedAddress.addressLine2}</p>}
+                <p className="text-gray-700">{selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pincode}</p>
+                <p className="text-gray-700">{selectedAddress.country}</p>
+                <p className="text-gray-700">Mobile: {selectedAddress.phone}</p>
               </div>
+            ) : (
+              <p className="text-gray-600 mb-4">No address selected.</p>
             )}
-            <div className="border-t border-gray-200 pt-4 mt-4">
-              <div className="flex justify-between text-lg font-bold">
+
+            {/* Order details */}
+            <div className="space-y-2 text-gray-800">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>Rs. {productSubtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping:</span>
+                <span>
+                  {pincodeStatus === 'loading' ? 'Calculating...' : `Rs. ${shippingCharge.toFixed(2)}`}
+                </span>
+              </div>
+              <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
                 <span>Total:</span>
-                <span>₹{total.toFixed(2)}</span>
+                <span>Rs. {totalAmount.toFixed(2)}</span>
               </div>
             </div>
+
+            <Button
+              onClick={handleConfirmOrder}
+              className="w-full mt-6 py-3 text-lg"
+              disabled={!selectedAddressId || pincodeStatus === 'loading' || isProcessingPayment}
+            >
+              {isProcessingPayment ? 'Processing Payment...' : 'Confirm Order'}
+            </Button>
           </div>
         </div>
       </div>
-    </>
+    </MainLayout>
   );
-};
-
-export default CheckoutPage;
+}

@@ -6,8 +6,9 @@ import wishlistReducer from './wishlistSlice';
 import categoryReducer from './categorySlice';
 import homeReducer from './homeSlice';
 import searchReducer from './searchSlice';
-
 import productDetailsReducer from './productDetailsSlice';
+import addressReducer from './addressSlice'; // Import addressReducer
+import orderConfirmationReducer from './orderConfirmationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +20,8 @@ export const store = configureStore({
     home: homeReducer,
     search: searchReducer,
     productDetails: productDetailsReducer,
+    address: addressReducer, // Add addressReducer to the store
+    orderConfirmation: orderConfirmationReducer,
   },
 });
 

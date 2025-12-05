@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { refreshToken as refreshTokenApi } from './authService';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
@@ -20,8 +21,8 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    // TODO: Get token from Redux store or localStorage
-    const token = localStorage.getItem('authToken'); 
+    const { store } = require('../store');
+    const token = store.getState().user.token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,10 +38,31 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
-    // TODO: Handle token expiration or other auth errors
-    if (error.response && error.response.status === 401) {
-      // Optionally, redirect to login page or refresh token
-      console.log('Unauthorized, redirecting to login...');
+    console.log("err=>",error);
+    
+    const originalRequest = error.config;
+    if (error.response.status === 401 && error.response.data.message === 'Token expired' && !originalRequest._retry) {
+      originalRequest._retry = true;
+      const { store } = require('../store');
+      const { updateAccessToken, clearAuthData } = require('../store/userSlice');
+      const refreshToken = store.getState().user.refreshToken;
+      console.log("refreshToken=>",refreshToken);
+      console.log("store.getState()=>",store.getState());
+      
+      if (refreshToken) {
+        try {
+          const res:any = await refreshTokenApi(refreshToken);
+          console.log("token =>",res.data.token);
+          store.dispatch(updateAccessToken(res.data.token));
+          originalRequest.headers.Authorization = `Bearer ${res.data.token}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          store.dispatch(clearAuthData());
+          return Promise.reject(refreshError);
+        }
+      } else {
+        store.dispatch(clearAuthData());
+      }
     }
     return Promise.reject(error);
   }

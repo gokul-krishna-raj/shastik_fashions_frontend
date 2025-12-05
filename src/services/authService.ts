@@ -22,6 +22,16 @@ export const register = async (credentials: RegisterCredentials): Promise<AuthRe
   }
 };
 
+export const refreshToken = async (refreshToken: string): Promise<{ token: string }> => {
+  try {
+    const response = await unauthApi.post<{ token: string }>('/auth/refresh-token', { refreshToken });
+    return response.data;
+  } catch (error) {
+    console.error('Error during token refresh:', error);
+    throw error;
+  }
+};
+
 /*
 Example Usage:
 

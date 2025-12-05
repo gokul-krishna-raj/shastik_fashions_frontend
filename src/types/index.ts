@@ -55,12 +55,13 @@ export interface RegisterCredentials extends LoginCredentials {
 }
 
 export interface AuthResponse {
-  accessToken: string;
   data: {
     id: string;
     email: string;
     name: string;
     mobile: string;
+    token: string;
+    refreshToken: string;
   };
 }
 

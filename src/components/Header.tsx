@@ -301,7 +301,7 @@ const Header = () => {
               {searchStatus === 'loading' && <p className="text-center">Loading...</p>}
               {searchStatus === 'failed' && <p className="text-center text-red-500">Error searching products.</p>}
               {searchStatus === 'succeeded' && searchResults.length === 0 && debouncedSearchQuery && (
-                <p className="text-center">No results found for "{debouncedSearchQuery}"</p>
+                <p className="text-center">No results found for &quot;{debouncedSearchQuery}&quot;</p>
               )}
               {searchStatus === 'succeeded' && searchResults.length > 0 && (
                 <div>

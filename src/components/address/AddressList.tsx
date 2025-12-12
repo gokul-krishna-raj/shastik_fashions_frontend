@@ -54,7 +54,7 @@ const AddressList = () => {
         </div>
 
         {addresses.length === 0 && status !== 'loading' ? (
-          <p className="text-center text-gray-600">No addresses found. Click "Add New Address" to get started.</p>
+          <p className="text-center text-gray-600">No addresses found. Click &quot;Add New Address&quot; to get started.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {addresses.map((address) => (

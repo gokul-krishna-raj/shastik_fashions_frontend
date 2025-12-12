@@ -200,7 +200,7 @@ export default function CheckoutPage() {
       setIsProcessingPayment(false);
     });
     paymentObject.open();
-  }, [totalAmount, selectedAddress, user, router, toast]);
+  }, [totalAmount, selectedAddress, user, router, toast, cartItems, selectedAddressId]);
 
 
 // ... (imports and component setup)

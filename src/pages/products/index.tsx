@@ -64,14 +64,14 @@ const ProductsPage = () => {
     if (status === 'idle' || (status === 'succeeded' && products.length === 0 && initialPage === 1)) {
       dispatch(fetchProducts({ page: initialPage, filters: initialFilters, sort: initialSort, append: false }));
     }
-  }, [router.query]); // Depend on router.query to re-evaluate when URL changes
+  }, [router.query, dispatch, filters, page, products.length, sort, status]); // Depend on router.query to re-evaluate when URL changes
 
   // Fetch more products when page changes (for infinite scroll)
   useEffect(() => {
     if (page > 1 && hasMore && status !== 'loading') {
       dispatch(fetchProducts({ page, filters, sort, append: true }));
     }
-  }, [page]); // Depend on page to trigger infinite scroll
+  }, [page, dispatch, filters, hasMore, sort, status]); // Depend on page to trigger infinite scroll
 
   // Effect to update URL when filters or sort change
   useEffect(() => {
@@ -89,7 +89,7 @@ const ProductsPage = () => {
       pathname: router.pathname,
       query,
     }, undefined, { shallow: true });
-  }, [filters, sort, page]);
+  }, [filters, sort, page, router]);
 
   const handleApplyFilters = useCallback((newFilters: SareeFilters) => {
     dispatch(setFilters(newFilters));

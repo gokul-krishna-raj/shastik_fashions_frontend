@@ -48,14 +48,14 @@ const BestSellerPage = () => {
     if (status === 'idle' || (status === 'succeeded' && products.length === 0 && initialPage === 1)) {
       dispatch(fetchProducts({ page: initialPage, sort: initialSort, append: false, type: 'best-sellers' }));
     }
-  }, [router.query]);
+  }, [router.query, dispatch, page, products.length, sort, status]);
 
   // Fetch more products when page changes (for infinite scroll)
   useEffect(() => {
     if (page > 1 && hasMore && status !== 'loading') {
       dispatch(fetchProducts({ page, filters, sort, append: true, type: 'best-sellers' }));
     }
-  }, [page]);
+  }, [page, dispatch, filters, hasMore, sort, status]);
 
   // Effect to update URL when sort changes
   useEffect(() => {
@@ -67,7 +67,7 @@ const BestSellerPage = () => {
       pathname: router.pathname,
       query,
     }, undefined, { shallow: true });
-  }, [sort, page]);
+  }, [sort, page, router]);
 
   const handleSortChange = useCallback((newSort: string) => {
     dispatch(setSort(newSort));

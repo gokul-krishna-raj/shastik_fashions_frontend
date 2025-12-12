@@ -3,17 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff; /* White */
-  --foreground: #333333;
-  --primary: #A52A2A; /* Brown */
-  --primary-dark: #800000; /* Darker Brown */
-  --primary-light: #D2691E; /* Lighter Brown */
-  --primary-foreground: #ffffff;
-  --card: #ffffff;
-  --card-foreground: #A52A2A;
-  --muted: #e0e0d0;
-  --muted-foreground: #666666;
+  --background: #f8fafc; /* slate-50 */
+  --foreground: #0f172a; /* slate-900 */
+  --primary: #0284c7; /* sky-600 */
+  --primary-dark: #0369a1; /* sky-700 */
+  --primary-light: #38bdf8; /* sky-400 */
+  --primary-foreground: #ffffff; /* white */
+  --card: #ffffff; /* white */
+  --card-foreground: #0f172a; /* slate-900 */
+  --muted: #f1f5f9; /* slate-100 */
+  --muted-foreground: #64748b; /* slate-500 */
 }
+
+.dark {
+    --background: #0f172a; /* slate-900 */
+    --foreground: #f8fafc; /* slate-50 */
+    --primary: #38bdf8; /* sky-400 */
+    --primary-dark: #0ea5e9; /* sky-500 */
+    --primary-light: #0284c7; /* sky-600 */
+    --primary-foreground: #0f172a; /* slate-900 */
+    --card: #020817;
+    --card-foreground: #f8fafc; /* slate-50 */
+    --muted: #1e293b; /* slate-800 */
+    --muted-foreground: #94a3b8; /* slate-400 */
+}
+
 
 body {
   background-color: var(--background);

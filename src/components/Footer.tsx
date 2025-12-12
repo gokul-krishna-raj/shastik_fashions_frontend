@@ -47,7 +47,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="text-center mt-8 text-gray-500">
-          &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+          &copy; {new Date().getFullYear()} Shastik Fashions. All rights reserved.
         </div>
       </div>
     </footer>

@@ -77,7 +77,7 @@ const BestSellers: React.FC = () => {
       )}
       <div className="text-center mt-8">
         <Link href="/best-seller" legacyBehavior>
-          <a className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          <a className="bg-[#8A1538] text-white font-bold py-2 px-4 rounded">
             View All
           </a>
         </Link>

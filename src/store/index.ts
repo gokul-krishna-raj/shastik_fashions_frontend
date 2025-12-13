@@ -7,8 +7,11 @@ import categoryReducer from './categorySlice';
 import homeReducer from './homeSlice';
 import searchReducer from './searchSlice';
 import productDetailsReducer from './productDetailsSlice';
-import addressReducer from './addressSlice'; // Import addressReducer
+import addressReducer from './addressSlice';
 import orderConfirmationReducer from './orderConfirmationSlice';
+import adminReducer from './adminSlice';
+import adminProductReducer from './adminProductSlice';
+import adminOrderReducer from './adminOrderSlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,8 +23,11 @@ export const store = configureStore({
     home: homeReducer,
     search: searchReducer,
     productDetails: productDetailsReducer,
-    address: addressReducer, // Add addressReducer to the store
+    address: addressReducer,
     orderConfirmation: orderConfirmationReducer,
+    admin: adminReducer,
+    adminProduct: adminProductReducer,
+    adminOrder: adminOrderReducer,
   },
 });
 

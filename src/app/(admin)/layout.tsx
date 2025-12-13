@@ -1,10 +1,9 @@
-import type { Metadata } from "next";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+'use client';
 
-export const metadata: Metadata = {
-  title: "Shastik Fashions - Admin",
-  description: "Admin panel for Shastik Fashions",
-};
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminNavbar } from "@/components/admin/AdminNavbar";
+import { AdminRouteGuard } from "@/components/admin/AdminRouteGuard";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function AdminLayout({
   children,
@@ -12,16 +11,17 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background flex">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col lg:ml-64">
-        <header className="bg-card border-b p-4">
-          {/* Placeholder for a header, maybe with breadcrumbs later */}
-        </header>
-        <main className="flex-1 p-8">
-          {children}
-        </main>
+    <AdminRouteGuard>
+      <div className="min-h-screen bg-slate-50 flex">
+        <AdminSidebar />
+        <div className="flex-1 flex flex-col">
+          <AdminNavbar />
+          <main className="flex-1 p-4 sm:p-6 lg:p-8">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+      <Toaster />
+    </AdminRouteGuard>
   );
 }

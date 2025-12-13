@@ -21,7 +21,7 @@ const HomePage = () => {
   }, [dispatch]);
 
   return (
-    <>
+    <main className="min-h-screen bg-white">
       <NextSeo
         title="Home | Shastik Fashions"
         description="Welcome to Shastik Fashions. Find the best products here."
@@ -30,7 +30,7 @@ const HomePage = () => {
       <CategorySection categories={categories} loading={status === 'loading'} />
       <NewArrivals />
       <BestSellers />
-    </>
+    </main>
   );
 };
 

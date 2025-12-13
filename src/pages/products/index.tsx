@@ -132,72 +132,80 @@ const ProductsPage = () => {
   };
 
   return (
-    <>
+    <main className="min-h-screen bg-gradient-to-b from-white to-rose-50">
       <NextSeo
         title="Products | Shastik Fashions"
         description="Browse all products in our store."
       />
-      <div className="flex flex-col lg:flex-row bg-[#FFF9F5]">
-        {/* Filter Sidebar Toggle for Mobile */}
-        <button
-          className="lg:hidden p-4 bg-[#8A1538] text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#C99A5E] focus:ring-offset-2"
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="Open filters sidebar"
-        >
-          <Menu className="mr-2" /> Filters
-        </button>
-
-        {/* Filter Sidebar */}
-        <FilterSidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          filters={filters}
-          onApply={handleApplyFilters}
-          onClearAll={handleClearAllFilters}
-        />
-
-        {/* Product List */}
-        <div className="flex-1 p-4 lg:pl-0">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-[#8A1538]">All Products</h1>
-            <SortDropdown currentSort={sort} onSortChange={handleSortChange} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="lg:hidden flex items-center justify-between bg-white/90 backdrop-blur-lg border border-rose-100 rounded-2xl px-4 py-3 shadow-sm">
+            <div>
+              <p className="text-xs uppercase tracking-[0.25em] text-rose-500 font-semibold">Shop</p>
+              <h1 className="text-xl font-bold text-slate-900">All Products</h1>
+            </div>
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white font-semibold shadow-lg hover:shadow-2xl transition-all"
+              onClick={() => setIsSidebarOpen(true)}
+              aria-label="Open filters sidebar"
+            >
+              <Menu size={18} /> Filters
+            </button>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {(products || []).map((product, index) => {
-              if ((products || []).length === index + 1) {
+          <FilterSidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            filters={filters}
+            onApply={handleApplyFilters}
+            onClearAll={handleClearAllFilters}
+          />
+
+          <div className="flex-1">
+            <div className="hidden lg:flex justify-between items-center mb-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-rose-500 font-semibold">Shop</p>
+                <h1 className="text-3xl font-bold text-slate-900">All Products</h1>
+              </div>
+              <SortDropdown currentSort={sort} onSortChange={handleSortChange} />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {(products || []).map((product, index) => {
+                if ((products || []).length === index + 1) {
+                  return (
+                    <div ref={lastProductElementRef} key={product._id}>
+                      <ProductCard
+                        product={product}
+                        onAddToCart={handleAddToCart}
+                        onAddToWishlist={handleAddToWishlist}
+                        isLoggedIn={!!token}
+                      />
+                    </div>
+                  );
+                }
                 return (
-                  <div ref={lastProductElementRef} key={product._id}>
-                    <ProductCard
-                      product={product}
-                      onAddToCart={handleAddToCart}
-                      onAddToWishlist={handleAddToWishlist}
-                      isLoggedIn={!!token}
-                    />
-                  </div>
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                    onAddToWishlist={handleAddToWishlist}
+                    isLoggedIn={!!token}
+                  />
                 );
-              }
-              return (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  onAddToCart={handleAddToCart}
-                  onAddToWishlist={handleAddToWishlist}
-                  isLoggedIn={!!token}
-                />
-              );
-            })}
-            {status === 'loading' &&
-              Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
-          </div>
+              })}
+              {status === 'loading' &&
+                Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+            </div>
 
-          {status === 'failed' && <p className="text-center text-red-500 mt-8">Failed to load products.</p>}
-          {!hasMore && status === 'succeeded' && products.length > 0 && (
-            <p className="text-center text-gray-500 mt-8">You have reached the end of the list.</p>
-          )}
+            {status === 'failed' && <p className="text-center text-rose-600 mt-8">Failed to load products.</p>}
+            {!hasMore && status === 'succeeded' && products.length > 0 && (
+              <p className="text-center text-slate-500 mt-8">You have reached the end of the list.</p>
+            )}
+          </div>
         </div>
       </div>
-    </>
+    </main>
   );
 };
 

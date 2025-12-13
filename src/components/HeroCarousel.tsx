@@ -61,7 +61,7 @@ const HeroCarousel: React.FC = () => {
 
   return (
     <div 
-      className="relative w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] overflow-hidden" 
+      className="relative w-full h-[260px] sm:h-[320px] md:h-[380px] lg:h-[440px] overflow-hidden rounded-none" 
       role="region" 
       aria-label="Hero Carousel"
       onMouseEnter={() => setIsPaused(true)}
@@ -87,34 +87,46 @@ const HeroCarousel: React.FC = () => {
             priority
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-black bg-opacity-30 sm:bg-opacity-40 flex flex-col justify-center items-center text-white p-4 sm:p-6 md:p-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 px-4 drop-shadow-lg">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/35 to-black/55 sm:via-black/45 flex flex-col justify-center items-center text-white px-4 sm:px-8 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-md text-sm font-semibold uppercase tracking-[0.2em] mb-4 shadow-lg">
+              <span className="h-2 w-2 rounded-full bg-amber-300 animate-ping" />
+              Curated Saree Edit
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 px-4 drop-shadow-xl leading-tight">
               {items[currentIndex].title}
             </h2>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-3 sm:mb-4 md:mb-6 px-4 max-w-2xl drop-shadow-lg">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-5 sm:mb-6 px-4 max-w-3xl drop-shadow-lg text-rose-50">
               {items[currentIndex].description}
             </p>
-            <a
-              href={items[currentIndex].link}
-              className="bg-white text-gray-900 hover:bg-gray-100 font-bold py-2 px-4 sm:py-2.5 sm:px-6 md:py-3 md:px-8 rounded-full transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 text-sm sm:text-base md:text-lg shadow-lg"
-              aria-label={`Shop now for ${items[currentIndex].title}`}
-            >
-              Shop Now
-            </a>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <a
+                href={items[currentIndex].link}
+                className="bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white font-semibold py-2.5 px-6 sm:py-3 sm:px-8 rounded-full transition-all transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-rose-200 text-sm sm:text-base"
+                aria-label={`Shop now for ${items[currentIndex].title}`}
+              >
+                Shop the edit
+              </a>
+              <a
+                href="/categories"
+                className="bg-white/90 text-rose-700 font-semibold py-2.5 px-6 sm:py-3 sm:px-8 rounded-full transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl text-sm sm:text-base"
+              >
+                Browse categories
+              </a>
+            </div>
           </div>
         </motion.div>
       </AnimatePresence>
 
       {/* Indicator dots */}
-      <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 flex justify-center space-x-2 z-10" role="tablist">
+      <div className="absolute bottom-3 sm:bottom-5 left-0 right-0 flex justify-center space-x-2 z-10" role="tablist">
         {items.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentIndex(idx)}
-            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all ${
+            className={`h-2 sm:h-2.5 rounded-full transition-all ${
               idx === currentIndex 
-                ? 'bg-white w-6 sm:w-8' 
-                : 'bg-white/50 hover:bg-white/75'
+                ? 'bg-white/90 w-7 sm:w-9 shadow-md' 
+                : 'bg-white/60 hover:bg-white/80 w-3 sm:w-3.5'
             } focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2`}
             aria-label={`Go to slide ${idx + 1}`}
             role="tab"
@@ -123,7 +135,6 @@ const HeroCarousel: React.FC = () => {
         ))}
       </div>
 
-      {/* Optional: Progress bar */}
       {!isPaused && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
           <motion.div

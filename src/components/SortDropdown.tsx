@@ -29,23 +29,24 @@ const SortDropdown: React.FC<SortDropdownProps> = ({ currentSort, onSortChange }
         styles={{
           control: (base) => ({
             ...base,
-            borderColor: '#d1d5db',
+            borderColor: '#f1c0d6',
+            borderRadius: 12,
             '&:hover': {
-              borderColor: '#9ca3af',
+              borderColor: '#f472b6',
             },
             boxShadow: 'none',
             outline: 'none',
             '&:focus-within': {
-              borderColor: '#a0522d',
-              boxShadow: '0 0 0 2px rgba(160, 82, 45, 0.5)',
+              borderColor: '#fb7185',
+              boxShadow: '0 0 0 2px rgba(251, 113, 133, 0.35)',
             },
           }),
           option: (base, state) => ({
             ...base,
-            backgroundColor: state.isSelected ? '#a0522d' : state.isFocused ? '#f5f5dc' : undefined,
-            color: state.isSelected ? 'white' : '#333333',
+            backgroundColor: state.isSelected ? '#fb7185' : state.isFocused ? '#ffe4e6' : undefined,
+            color: state.isSelected ? 'white' : '#1f2937',
             '&:active': {
-              backgroundColor: '#a0522d',
+              backgroundColor: '#fb7185',
             },
           }),
         }}

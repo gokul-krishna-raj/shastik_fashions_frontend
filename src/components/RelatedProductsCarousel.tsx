@@ -1,10 +1,15 @@
 
 import React from 'react';
 import ProductCard from './ProductCard';
-
 import { Product } from '@/types';
-
 import { useAppSelector } from '@/store/hooks';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 interface RelatedProductsCarouselProps {
   products: Product[];
@@ -20,24 +25,36 @@ const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = ({
   const { token } = useAppSelector((state) => state.user);
 
   if (!products || products.length === 0) {
-    return null; // Don't render if no related products
+    return null;
   }
 
   return (
-    <section className="my-8">
-      <h2 className="text-2xl font-bold mb-4">Related Products</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-x-auto">
-        {products.map((product) => (
-          <ProductCard
-            key={product._id}
-            product={product}
-            onAddToCart={onAddToCart}
-            onAddToWishlist={onAddToWishlist}
-            isLoggedIn={!!token}
-          />
-        ))}
-      </div>
-    </section>
+    <div className="relative">
+      <Carousel
+        opts={{
+          align: 'start',
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {products.map((product) => (
+            <CarouselItem key={product._id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
+              <div className="p-1">
+                <ProductCard
+                  product={product}
+                  onAddToCart={onAddToCart}
+                  onAddToWishlist={onAddToWishlist}
+                  isLoggedIn={!!token}
+                />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="left-0 bg-white/90 hover:bg-white border-rose-200 text-rose-600 shadow-lg" />
+        <CarouselNext className="right-0 bg-white/90 hover:bg-white border-rose-200 text-rose-600 shadow-lg" />
+      </Carousel>
+    </div>
   );
 };
 

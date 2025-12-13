@@ -9,21 +9,21 @@ export interface Category {
 }
 
 export interface Product {
-    _id: string;
-    name: string;
-    description: string;
-    originalPrice: number;
-    price: number;
-    category: any;
-    images: string[];
-    fabric: string;
-    color: string;
-    stock: number;
-    isBestSeller: boolean;
-    isNewArrival: boolean;
-    createdAt: string;
-    updatedAt: string;
-  
+  _id: string;
+  name: string;
+  description: string;
+  originalPrice: number;
+  price: number;
+  category: any;
+  images: string[];
+  fabric: string;
+  color: string;
+  stock: number;
+  isBestSeller: boolean;
+  isNewArrival: boolean;
+  createdAt: string;
+  updatedAt: string;
+
 }
 
 export interface User {
@@ -85,4 +85,11 @@ export interface Address {
   isDefault?: boolean;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface SareeFilters {
+  category?: string[];
+  color?: string[];
+  fabric?: string[];
+  priceRange?: number[];
 }

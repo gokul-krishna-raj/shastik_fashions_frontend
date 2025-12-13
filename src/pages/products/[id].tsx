@@ -99,13 +99,6 @@ const ProductDetailsPage: React.FC = () => {
           title: product.name,
           description: product.description,
           type: 'product',
-          product: {
-            price: {
-              amount: product.price.toFixed(2),
-              currency: 'INR',
-            },
-            availability: product.stock > 0 ? 'instock' : 'outofstock',
-          },
         }}
       />
       <ArticleJsonLd

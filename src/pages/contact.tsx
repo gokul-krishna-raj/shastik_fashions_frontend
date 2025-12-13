@@ -8,14 +8,14 @@ import { MapPin, Phone, Mail } from 'lucide-react';
 interface ContactFormInputs {
   name: string;
   email: string;
-  phoneNumber?: string;
+  phoneNumber?: string | null;
   message: string;
 }
 
 const schema = yup.object().shape({
   name: yup.string().required('Name is required'),
   email: yup.string().email('Invalid email').required('Email is required'),
-  phoneNumber: yup.string().matches(/^\d{10}$/, 'Phone number must be 10 digits').optional().nullable(true),
+  phoneNumber: yup.string().matches(/^\d{10}$/, 'Phone number must be 10 digits').optional().nullable(),
   message: yup.string().required('Message is required'),
 });
 

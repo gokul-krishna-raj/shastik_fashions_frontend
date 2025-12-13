@@ -229,7 +229,7 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            {isClient && token && (
+            {isClient && token ? (
               <button
                 onClick={() => {
                   handleLogout();
@@ -239,6 +239,23 @@ const Header = () => {
               >
                 Logout
               </button>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-slate-800 hover:text-rose-700 text-base font-semibold py-2 px-3 rounded-lg hover:bg-rose-50 transition-all"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/auth/register"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-slate-800 hover:text-rose-700 text-base font-semibold py-2 px-3 rounded-lg hover:bg-rose-50 transition-all"
+                >
+                  Register
+                </Link>
+              </>
             )}
           </nav>
 
@@ -324,16 +341,16 @@ const Header = () => {
                   <ul className="space-y-2">
                     {searchResults.map((product) => (
                       <li key={product._id}>
-                        <Link 
-                          href={`/products/${product._id}`} 
+                        <Link
+                          href={`/products/${product._id}`}
                           onClick={() => setIsSearchOpen(false)}
                           className="flex items-center space-x-4 p-2 hover:bg-rose-50 rounded-xl transition-colors"
                         >
-                          <Image 
-                            src={product.images[0] || '/Images/placeholder.png'} 
-                            alt={product.name} 
-                            width={48} 
-                            height={48} 
+                          <Image
+                            src={product.images[0] || '/Images/placeholder.png'}
+                            alt={product.name}
+                            width={48}
+                            height={48}
                             className="rounded-lg object-cover shadow-sm"
                           />
                           <div>

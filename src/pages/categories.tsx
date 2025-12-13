@@ -15,7 +15,9 @@ interface Category {
 
 const CategoriesPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { categories, loading, error } = useSelector((state: RootState) => state.categories);
+  const { categories, status, error } = useSelector((state: RootState) => state.categories);
+
+  const loading = status === 'loading';
 
   useEffect(() => {
     dispatch(fetchCategories());

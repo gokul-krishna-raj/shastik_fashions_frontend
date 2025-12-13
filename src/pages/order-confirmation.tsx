@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // --- Sub-components (Unchanged) ---
 
-const OrderSummary = ({ order }) => (
+const OrderSummary = ({ order }: { order: any }) => (
   <Card>
     <CardHeader>
       <CardTitle>Order Summary</CardTitle>
@@ -43,7 +43,7 @@ const OrderSummary = ({ order }) => (
   </Card>
 );
 
-const ItemsPurchased = ({ products }) => (
+const ItemsPurchased = ({ products }: { products: any[] }) => (
   <Card>
     <CardHeader>
       <CardTitle>Items Purchased</CardTitle>
@@ -65,7 +65,7 @@ const ItemsPurchased = ({ products }) => (
   </Card>
 );
 
-const ShippingDetails = ({ details }) => {
+const ShippingDetails = ({ details }: { details: any }) => {
   const fullAddress = `${details.addressLine1}, ${details.addressLine2 ? details.addressLine2 + ', ' : ''}${details.city}, ${details.state} - ${details.pincode}, ${details.country}`;
   const estimatedDeliveryDate = new Date();
   estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 5);
@@ -87,7 +87,7 @@ const ShippingDetails = ({ details }) => {
   );
 };
 
-const PaymentDetails = ({ details }) => (
+const PaymentDetails = ({ details }: { details: any }) => (
   <Card>
     <CardHeader>
       <CardTitle>Payment Details</CardTitle>
@@ -127,7 +127,7 @@ const ConfirmationMessage = () => (
   </div>
 );
 
-const TrackOrderButton = ({ orderId }) => (
+const TrackOrderButton = ({ orderId }: { orderId: string }) => (
   <div className="text-center mt-6">
     <Button size="lg" className="w-full md:w-auto" onClick={() => alert(`Tracking order: ${orderId}`)}>
       Track Your Order
@@ -183,62 +183,62 @@ const OrderConfirmationPage: NextPage = () => {
 
   if (loading === 'pending' || loading === 'idle') {
     return (
-        <LoadingSkeleton />
+      <LoadingSkeleton />
     );
   }
 
   if (error) {
     return (
-        <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-red-600">Error</h1>
-          <p className="text-muted-foreground">{error}</p>
-          <Button onClick={() => router.push('/')} className="mt-4">Go to Homepage</Button>
-        </div>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold text-red-600">Error</h1>
+        <p className="text-muted-foreground">{error}</p>
+        <Button onClick={() => router.push('/')} className="mt-4">Go to Homepage</Button>
+      </div>
     );
   }
 
   if (!order) {
     return (
-        <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold">Order Not Found</h1>
-          <p className="text-muted-foreground">The requested order could not be found. Please check the ID and try again.</p>
-          <Button onClick={() => router.push('/')} className="mt-4">Go to Homepage</Button>
-        </div>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold">Order Not Found</h1>
+        <p className="text-muted-foreground">The requested order could not be found. Please check the ID and try again.</p>
+        <Button onClick={() => router.push('/')} className="mt-4">Go to Homepage</Button>
+      </div>
     );
   }
 
   return (
-      <div className="container mx-auto px-4 py-8">
-        <header className="mb-8">
-          <ConfirmationMessage />
-        </header>
+    <div className="container mx-auto px-4 py-8">
+      <header className="mb-8">
+        <ConfirmationMessage />
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <ItemsPurchased products={order.products} />
-          </div>
-
-          <div className="space-y-8">
-            {order && <OrderSummary order={order} />}
-            {order && <ShippingDetails details={order.shippingAddress} />}
-            {order && <PaymentDetails details={order} />}
-            {order && <TrackOrderButton orderId={order._id} />}
-
-
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <ItemsPurchased products={order.products} />
         </div>
-
-        <Separator className="my-12" />
 
         <div className="space-y-8">
-          <h2 className="text-2xl font-bold text-center">You Might Also Like</h2>
-          <RelatedProductsCarousel products={suggestedProducts} onAddToCart={() => { }} onAddToWishlist={() => { }} />
+          {order && <OrderSummary order={order} />}
+          {order && <ShippingDetails details={order.shippingAddress} />}
+          {order && <PaymentDetails details={order} />}
+          {order && <TrackOrderButton orderId={order._id} />}
+
+
         </div>
-
-        <Separator className="my-12" />
-
-        <BrandStory />
       </div>
+
+      <Separator className="my-12" />
+
+      <div className="space-y-8">
+        <h2 className="text-2xl font-bold text-center">You Might Also Like</h2>
+        <RelatedProductsCarousel products={suggestedProducts} onAddToCart={() => { }} onAddToWishlist={() => { }} />
+      </div>
+
+      <Separator className="my-12" />
+
+      <BrandStory />
+    </div>
   );
 };
 

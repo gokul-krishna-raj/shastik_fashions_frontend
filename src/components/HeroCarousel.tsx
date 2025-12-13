@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface CarouselItem {
   id: string;
@@ -60,9 +61,9 @@ const HeroCarousel: React.FC = () => {
   }, [isPaused, handleNext, autoSlideInterval]);
 
   return (
-    <div 
-      className="relative w-full h-[260px] sm:h-[320px] md:h-[380px] lg:h-[440px] overflow-hidden rounded-none" 
-      role="region" 
+    <div
+      className="relative w-full h-[260px] sm:h-[320px] md:h-[380px] lg:h-[440px] overflow-hidden rounded-none"
+      role="region"
       aria-label="Hero Carousel"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -99,19 +100,19 @@ const HeroCarousel: React.FC = () => {
               {items[currentIndex].description}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <a
+              <Link
                 href={items[currentIndex].link}
                 className="bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white font-semibold py-2.5 px-6 sm:py-3 sm:px-8 rounded-full transition-all transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-rose-200 text-sm sm:text-base"
                 aria-label={`Shop now for ${items[currentIndex].title}`}
               >
                 Shop the edit
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/categories"
                 className="bg-white/90 text-rose-700 font-semibold py-2.5 px-6 sm:py-3 sm:px-8 rounded-full transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl text-sm sm:text-base"
               >
                 Browse categories
-              </a>
+              </Link>
             </div>
           </div>
         </motion.div>
@@ -123,11 +124,10 @@ const HeroCarousel: React.FC = () => {
           <button
             key={idx}
             onClick={() => setCurrentIndex(idx)}
-            className={`h-2 sm:h-2.5 rounded-full transition-all ${
-              idx === currentIndex 
-                ? 'bg-white/90 w-7 sm:w-9 shadow-md' 
-                : 'bg-white/60 hover:bg-white/80 w-3 sm:w-3.5'
-            } focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2`}
+            className={`h-2 sm:h-2.5 rounded-full transition-all ${idx === currentIndex
+              ? 'bg-white/90 w-7 sm:w-9 shadow-md'
+              : 'bg-white/60 hover:bg-white/80 w-3 sm:w-3.5'
+              } focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2`}
             aria-label={`Go to slide ${idx + 1}`}
             role="tab"
             aria-selected={idx === currentIndex}

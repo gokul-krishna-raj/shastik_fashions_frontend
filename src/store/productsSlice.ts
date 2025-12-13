@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { SareeFilters } from '@/types/filters';
-import { getProducts } from '@/services/productService';
+import { getProducts, getProductById } from '@/services/productService';
 
 import { Product } from '@/types';
 
@@ -48,14 +48,14 @@ interface FetchProductsArgs {
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async (
-    { 
-      page = 1, 
-      limit = 12, 
-      filters = initialState.filters, 
-      sort = initialState.sort, 
-      append = false, 
-      type = 'all', 
-      categoryId 
+    {
+      page = 1,
+      limit = 12,
+      filters = initialState.filters,
+      sort = initialState.sort,
+      append = false,
+      type = 'all',
+      categoryId
     }: FetchProductsArgs,
     { rejectWithValue }
   ) => {

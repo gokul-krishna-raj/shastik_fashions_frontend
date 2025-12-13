@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Address } from '@/types';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store';
 import { addAddress, updateAddress } from '@/store/addressSlice';
@@ -249,7 +249,7 @@ export function AddressForm({ address, onSuccess }: AddressFormProps) {
                 <input
                   type="checkbox"
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onChange={field.onChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
               </FormControl>

@@ -6,12 +6,13 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, LayoutDashboard, Package, PlusCircle, ShoppingBag } from "lucide-react";
+import { Menu, LayoutDashboard, Package, PlusCircle, ShoppingBag, Layers } from "lucide-react";
 
 const navLinks = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/products/new", label: "Create Product", icon: PlusCircle },
+  { href: "/admin/categories", label: "Categories", icon: Layers },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
 ];
 

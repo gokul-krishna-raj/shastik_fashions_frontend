@@ -13,7 +13,7 @@ import { addToWishlist } from '@/store/wishlistSlice';
 const NewArrivalsPage = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const { items: products, status, filters, sort, page, hasMore } = useSelector((state: RootState) => state.products);
+  const { items: products, status, isFetchingMore, filters, sort, page, hasMore } = useSelector((state: RootState) => state.products);
   const { token } = useSelector((state: RootState) => state.user);
 
   const observer = useRef<IntersectionObserver>();
@@ -90,7 +90,7 @@ const NewArrivalsPage = () => {
     }
     dispatch(addToWishlist(productId));
   };
-console.log("products =>",products);
+  console.log("products =>", products);
 
   return (
     <>
@@ -129,7 +129,7 @@ console.log("products =>",products);
                 />
               );
             })}
-            {status === 'loading' &&
+            {(status === 'loading' || isFetchingMore) &&
               Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
 

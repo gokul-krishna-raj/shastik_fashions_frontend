@@ -116,9 +116,10 @@ const Header = () => {
                 <Link
                   href={link.href}
                   key={link.href}
-                  className="text-slate-700 hover:text-rose-700 font-semibold tracking-wide transition-colors"
+                  className="group relative text-slate-700 hover:text-rose-700 font-medium tracking-wide transition-colors py-2"
                 >
                   {link.label}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-rose-600 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               ))}
             </nav>
@@ -207,95 +208,120 @@ const Header = () => {
       <div className="h-16 md:h-24"></div>
 
       <div
-        className={`fixed top-0 left-0 h-full w-72 max-w-[85vw] bg-white/95 backdrop-blur-xl shadow-2xl z-50 transform transition-transform duration-300 ease-in-out border-r border-rose-100 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:hidden`}
+        className={`fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl z-50 transform transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:hidden border-r border-rose-100/50 flex flex-col`}
       >
-        <div className="p-5 space-y-6">
+        <div className="p-6 flex items-center justify-between border-b border-rose-50 bg-rose-50/30">
+          <Link href="/" onClick={() => setIsMenuOpen(false)}>
+            <div className="relative h-8 w-28">
+              <Image
+                src="/Images/shastik_fahsion_logo_new.png"
+                alt="Shastik Fashions"
+                fill
+                className="object-contain"
+              />
+            </div>
+          </Link>
           <button
             onClick={() => setIsMenuOpen(false)}
-            className="text-rose-700 hover:text-rose-900 text-3xl"
+            className="p-2 -mr-2 text-rose-400 hover:text-rose-700 hover:bg-rose-50 rounded-full transition-colors"
             aria-label="Close menu"
           >
-            &times;
+            <X size={24} />
           </button>
-          <nav className="flex flex-col space-y-3">
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          <nav className="space-y-2">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">Menu</p>
             {navLinks.map((link) => (
               <Link
                 href={link.href}
                 key={link.href}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-slate-800 hover:text-rose-700 text-base font-semibold py-2 px-3 rounded-lg hover:bg-rose-50 transition-all"
+                className="flex items-center justify-between text-slate-700 hover:text-rose-700 text-lg font-medium py-3 px-3 rounded-xl hover:bg-rose-50/80 transition-all border border-transparent hover:border-rose-100"
               >
                 {link.label}
+                <svg className="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             ))}
-            {isClient && token ? (
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsMenuOpen(false);
-                }}
-                className="text-slate-800 hover:text-rose-700 text-base font-semibold py-2 px-3 w-full text-left rounded-lg hover:bg-rose-50 transition-all"
-              >
-                Logout
-              </button>
-            ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-slate-800 hover:text-rose-700 text-base font-semibold py-2 px-3 rounded-lg hover:bg-rose-50 transition-all"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/auth/register"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-slate-800 hover:text-rose-700 text-base font-semibold py-2 px-3 rounded-lg hover:bg-rose-50 transition-all"
-                >
-                  Register
-                </Link>
-              </>
-            )}
           </nav>
 
-          <div className="rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-amber-400 text-white p-4 shadow-lg">
-            <div className="flex items-center gap-3 mb-2">
-              <Sparkles size={20} />
-              <p className="font-semibold tracking-wide text-sm">Festive Picks</p>
+          <div className="space-y-4">
+            <div className="rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white p-5 shadow-lg shadow-rose-200">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                  <Sparkles size={20} className="text-white" />
+                </div>
+                <p className="font-bold tracking-wide">Festive Collection</p>
+              </div>
+              <p className="text-sm text-white/90 leading-relaxed mb-4">
+                Explore our handpicked sarees for the upcoming wedding season.
+              </p>
+              <Link
+                href="/products?category=festive"
+                onClick={() => setIsMenuOpen(false)}
+                className="inline-flex items-center justify-center w-full bg-white text-rose-600 font-bold py-3 rounded-xl text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+              >
+                Shop Now
+              </Link>
             </div>
-            <p className="text-sm/relaxed text-rose-50">
-              Curated sarees with luxe drapes and artisanal motifs.
-            </p>
-            <Link
-              href="/products"
-              onClick={() => setIsMenuOpen(false)}
-              className="mt-3 inline-flex items-center justify-center gap-2 w-full rounded-full bg-white/90 text-rose-700 font-semibold py-2 text-sm hover:bg-white transition-all"
-            >
-              Shop collection
-            </Link>
+
+            <div className="pt-4 border-t border-slate-100">
+              {isClient && token ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 text-slate-600 hover:text-rose-600 font-medium py-2 px-3 w-full transition-colors"
+                >
+                  <User size={20} />
+                  Logout
+                </button>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 text-slate-700 border border-slate-200 hover:border-rose-200 hover:bg-rose-50 font-semibold py-3 rounded-xl transition-all"
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 bg-slate-900 text-white hover:bg-slate-800 font-semibold py-3 rounded-xl transition-all shadow-md"
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {isMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
-          onClick={() => setIsMenuOpen(false)}
-        ></div>
-      )}
+      <div
+        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 transition-opacity duration-500 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          } md:hidden`}
+        onClick={() => setIsMenuOpen(false)}
+        aria-hidden="true"
+      />
 
       {isSearchOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-start justify-center pt-20 px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl animate-slideDown border border-rose-50">
-            <div className="p-4 border-b border-rose-100 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-9 w-9 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center">
-                  <Search size={18} />
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-start justify-center pt-24 px-4 transition-all duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl animate-slideDown overflow-hidden border border-white/50">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-rose-50/50 to-white">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-white shadow-sm text-rose-600 flex items-center justify-center border border-rose-100">
+                  <Search size={20} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">Search sarees</h3>
-                  <p className="text-xs text-slate-500">Find colors, fabrics, weaves</p>
+                  <h3 className="text-lg font-bold text-slate-900 leading-tight">Search Collection</h3>
+                  <p className="text-xs text-slate-500 font-medium">Find your perfect drape</p>
                 </div>
               </div>
               <button
@@ -304,66 +330,128 @@ const Header = () => {
                   setSearchQuery('');
                   dispatch(clearSearchResults());
                 }}
-                className="text-rose-500 hover:text-rose-700"
+                className="p-2 -mr-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-all"
                 aria-label="Close search"
               >
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={handleSearch} className="p-4">
-              <div className="relative">
+
+            <div className="p-6">
+              <form onSubmit={handleSearch} className="relative group">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for Kanjivaram, organza, pastel, zari..."
-                  className="w-full px-4 py-3 pl-12 border border-rose-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 bg-rose-50/60"
+                  placeholder="Try 'Red Kanjeevaram' or 'Silk Cotton'..."
+                  className="w-full px-5 py-4 pl-14 text-lg bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-rose-300 focus:bg-white focus:shadow-lg focus:shadow-rose-100/50 transition-all placeholder:text-slate-400 text-slate-900"
                   autoFocus
                 />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400" size={20} />
-              </div>
-              <button
-                type="submit"
-                className="mt-4 w-full bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white py-3 rounded-xl font-semibold tracking-wide shadow-lg hover:shadow-2xl transition-all"
-              >
-                Search
-              </button>
-            </form>
-            <div className="p-4 border-t border-rose-100 max-h-60 overflow-y-auto">
-              {searchStatus === 'loading' && <p className="text-center text-slate-500">Loading...</p>}
-              {searchStatus === 'failed' && <p className="text-center text-rose-600">Error searching products.</p>}
-              {searchStatus === 'succeeded' && searchResults.length === 0 && debouncedSearchQuery && (
-                <p className="text-center text-slate-600">No results for “{debouncedSearchQuery}”</p>
-              )}
-              {searchStatus === 'succeeded' && searchResults.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-800 mb-2">Search results</h4>
-                  <ul className="space-y-2">
-                    {searchResults.map((product) => (
-                      <li key={product._id}>
-                        <Link
-                          href={`/products/${product._id}`}
-                          onClick={() => setIsSearchOpen(false)}
-                          className="flex items-center space-x-4 p-2 hover:bg-rose-50 rounded-xl transition-colors"
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={24} />
+              </form>
+
+              <div className="mt-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                {searchStatus === 'loading' && (
+                  <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                    <div className="w-8 h-8 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin"></div>
+                    <p className="text-slate-500 font-medium">Searching our collection...</p>
+                  </div>
+                )}
+
+                {searchStatus === 'failed' && (
+                  <div className="text-center py-10">
+                    <p className="text-rose-600 font-medium">Unable to complete search.</p>
+                  </div>
+                )}
+
+                {searchStatus === 'succeeded' && searchResults.length === 0 && debouncedSearchQuery && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Search className="text-slate-300" size={32} />
+                    </div>
+                    <p className="text-slate-900 font-semibold text-lg">No matches found</p>
+                    <p className="text-slate-500">We couldn&apos;t find any products matching &quot;{debouncedSearchQuery}&quot;</p>
+                  </div>
+                )}
+
+                {searchStatus === 'succeeded' && searchResults.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                      <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Top Results</h4>
+                      <span className="text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-full">
+                        {searchResults.length} items
+                      </span>
+                    </div>
+                    <ul className="grid grid-cols-1 gap-2">
+                      {searchResults.map((product) => (
+                        <li key={product._id}>
+                          <Link
+                            href={`/products/${product._id}`}
+                            onClick={() => setIsSearchOpen(false)}
+                            className="flex items-center gap-4 p-3 hover:bg-rose-50/80 rounded-2xl transition-all group border border-transparent hover:border-rose-100"
+                          >
+                            <div className="relative h-16 w-16 flex-shrink-0 bg-white rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-all">
+                              <Image
+                                src={product.images[0] || '/Images/placeholder.png'}
+                                alt={product.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-slate-900 truncate group-hover:text-rose-700 transition-colors">
+                                {product.name}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-rose-600 font-bold">₹{product.price.toFixed(2)}</span>
+                                {product.stock < 5 && product.stock > 0 && (
+                                  <span className="text-[10px] text-amber-600 font-medium bg-amber-50 px-1.5 py-0.5 rounded-full">
+                                    Low Stock
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="p-2 text-slate-300 group-hover:text-rose-500 transform group-hover:translate-x-1 transition-all">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M5 12h14m-7-7 7 7-7 7" />
+                              </svg>
+                            </div>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {!debouncedSearchQuery && !searchStatus && (
+                  <div className="py-4">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">Popular searches</p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Silk Saree', 'Organza', 'Bridal Collection', 'Cotton', 'Festive'].map((term) => (
+                        <button
+                          key={term}
+                          onClick={() => setSearchQuery(term)}
+                          className="px-4 py-2 bg-slate-50 hover:bg-rose-50 hover:text-rose-700 text-slate-600 rounded-full text-sm font-medium transition-colors"
                         >
-                          <Image
-                            src={product.images[0] || '/Images/placeholder.png'}
-                            alt={product.name}
-                            width={48}
-                            height={48}
-                            className="rounded-lg object-cover shadow-sm"
-                          />
-                          <div>
-                            <p className="font-semibold text-slate-900">{product.name}</p>
-                            <p className="text-sm text-rose-600">₹{product.price}</p>
-                          </div>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                          {term}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {searchResults.length > 0 && (
+              <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
+                <button
+                  onClick={handleSearch}
+                  className="text-sm font-semibold text-rose-600 hover:text-rose-800 transition-colors"
+                >
+                  View all results
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

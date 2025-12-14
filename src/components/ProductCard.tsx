@@ -22,7 +22,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const router = useRouter();
   const { _id, name, price, originalPrice, images, category } = product;
-  console.log('category', category);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -60,10 +59,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
           <button
             onClick={handleWishlistClick}
-            className={`absolute top-3 right-3 z-10 p-2 rounded-full shadow-md transition-all ${
-                isInWishlist
-                  ? 'bg-rose-600 text-white'
-                  : 'bg-white/90 text-rose-600 hover:bg-rose-50'
+            className={`absolute top-3 right-3 z-10 p-2 rounded-full shadow-md transition-all ${isInWishlist
+              ? 'bg-rose-600 text-white'
+              : 'bg-white/90 text-rose-600 hover:bg-rose-50'
               } focus:outline-none focus:ring-2 focus:ring-rose-200`}
             aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >

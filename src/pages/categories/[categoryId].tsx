@@ -15,7 +15,7 @@ const CategoryProductsPage = () => {
   const router = useRouter();
   const { categoryId } = router.query;
   const dispatch = useDispatch<AppDispatch>();
-  const { items: products, status, sort, page, hasMore } = useSelector((state: RootState) => state.products);
+  const { items: products, status, isFetchingMore, sort, page, hasMore } = useSelector((state: RootState) => state.products);
   const { token } = useSelector((state: RootState) => state.user);
   const { categories } = useSelector((state: RootState) => state.categories);
 
@@ -124,6 +124,7 @@ const CategoryProductsPage = () => {
                 />
               );
             })}
+            {(status === 'loading' || isFetchingMore) && Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
         )}
 

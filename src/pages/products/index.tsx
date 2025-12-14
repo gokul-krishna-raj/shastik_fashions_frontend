@@ -15,7 +15,7 @@ import { SareeFilters } from '@/types/filters';
 const ProductsPage = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const { items: products, status, filters, sort, page, hasMore } = useSelector((state: RootState) => state.products);
+  const { items: products, status, isFetchingMore, filters, sort, page, hasMore } = useSelector((state: RootState) => state.products);
   const { token } = useSelector((state: RootState) => state.user);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -194,7 +194,7 @@ const ProductsPage = () => {
                   />
                 );
               })}
-              {status === 'loading' &&
+              {(status === 'loading' || isFetchingMore) &&
                 Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
             </div>
 

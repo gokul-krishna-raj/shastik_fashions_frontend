@@ -1,13 +1,12 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { SareeFilters } from '@/types/filters';
-import { getProducts, getProductById } from '@/services/productService';
-
+import { getProducts } from '@/services/productService';
 import { Product } from '@/types';
 
 interface ProductsState {
   items: Product[];
-  currentProduct: Product | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  isFetchingMore: boolean;
   error: string | null;
   filters: SareeFilters;
   sort: string;
@@ -19,8 +18,8 @@ interface ProductsState {
 
 const initialState: ProductsState = {
   items: [],
-  currentProduct: null,
   status: 'idle',
+  isFetchingMore: false,
   error: null,
   filters: {
     category: [],
@@ -74,18 +73,6 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
-export const fetchProductById = createAsyncThunk(
-  'products/fetchProductById',
-  async (id: string, { rejectWithValue }) => {
-    try {
-      const response = await getProductById(id);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch product details');
-    }
-  }
-);
-
 const productsSlice = createSlice({
   name: 'products',
   initialState,
@@ -95,12 +82,14 @@ const productsSlice = createSlice({
       state.page = 1;
       state.items = [];
       state.hasMore = true;
+      state.status = 'idle'; // Reset status to trigger re-fetch if needed
     },
     setSort: (state, action: PayloadAction<string>) => {
       state.sort = action.payload;
       state.page = 1;
       state.items = [];
       state.hasMore = true;
+      state.status = 'idle';
     },
     setPage: (state, action: PayloadAction<number>) => {
       state.page = action.payload;
@@ -110,51 +99,48 @@ const productsSlice = createSlice({
       state.page = 1;
       state.hasMore = true;
       state.status = 'idle';
-    },
-    setCurrentProduct: (state, action: PayloadAction<Product | null>) => {
-      state.currentProduct = action.payload;
+      state.isFetchingMore = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
       // Fetch Products
-      .addCase(fetchProducts.pending, (state) => {
-        state.status = 'loading';
+      .addCase(fetchProducts.pending, (state, action) => {
+        // If appending (Load More), don't set global loading status, just isFetchingMore
+        if (action.meta.arg.append) {
+          state.isFetchingMore = true;
+        } else {
+          state.status = 'loading';
+        }
         state.error = null;
       })
       .addCase(fetchProducts.fulfilled, (state, action: PayloadAction<{ products: Product[]; page: number; totalPages: number; hasMore: boolean; append: boolean }>) => {
         state.status = 'succeeded';
+        state.isFetchingMore = false;
+
         if (action.payload.append) {
-          state.items = [...state.items, ...action.payload.products];
+          // Filter out duplicates just in case
+          const newProducts = action.payload.products.filter(
+            (newP) => !state.items.some((existingP) => existingP._id === newP._id)
+          );
+          state.items = [...state.items, ...newProducts];
         } else {
           state.items = action.payload.products;
         }
+
         state.page = action.payload.page;
         state.totalPages = action.payload.totalPages;
         state.hasMore = action.payload.hasMore;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = 'failed';
+        state.isFetchingMore = false;
         state.error = (action.payload as string) || 'Failed to fetch products';
-        state.hasMore = false;
-      })
-      // Fetch Product by ID
-      .addCase(fetchProductById.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-        state.currentProduct = null;
-      })
-      .addCase(fetchProductById.fulfilled, (state, action: PayloadAction<Product>) => {
-        state.status = 'succeeded';
-        state.currentProduct = action.payload;
-      })
-      .addCase(fetchProductById.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = (action.payload as string) || 'Failed to fetch product details';
-        state.currentProduct = null;
+        // Note: We don't verify hasMore=false here, allowing retries
       });
   },
 });
 
-export const { setFilters, setSort, setPage, resetProducts, setCurrentProduct } = productsSlice.actions;
+export const { setFilters, setSort, setPage, resetProducts } = productsSlice.actions;
 export default productsSlice.reducer;

@@ -209,14 +209,14 @@ export default function ProductForm({
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6 pb-10 max-w-full overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">{isEditing ? 'Edit Product' : 'Create New Product'}</h1>
-                    <p className="text-slate-600 mt-1">{isEditing ? 'Update product details' : 'Add a new product to your catalog'}</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{isEditing ? 'Edit Product' : 'Create New Product'}</h1>
+                    <p className="text-slate-600 mt-1 text-sm sm:text-base">{isEditing ? 'Update product details' : 'Add a new product to your catalog'}</p>
                 </div>
                 <Link href="/admin/products">
-                    <Button variant="outline" className="rounded-xl">
+                    <Button variant="outline" className="rounded-xl w-full sm:w-auto">
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Back to Products
                     </Button>
@@ -225,9 +225,9 @@ export default function ProductForm({
 
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-6 lg:grid-cols-2">
                         {/* Left Column */}
-                        <div className="space-y-6">
+                        <div className="space-y-6 min-w-0">
                             <Card className="rounded-xl border border-slate-200 shadow-sm bg-white">
                                 <CardHeader>
                                     <CardTitle className="text-slate-900">Basic Information</CardTitle>
@@ -372,7 +372,7 @@ export default function ProductForm({
                         </div>
 
                         {/* Right Column */}
-                        <div className="space-y-6">
+                        <div className="space-y-6 min-w-0">
                             <Card className="rounded-xl border border-slate-200 shadow-sm bg-white">
                                 <CardHeader>
                                     <CardTitle className="text-slate-900">Product Attributes</CardTitle>
@@ -616,15 +616,15 @@ export default function ProductForm({
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-4 pt-4">
-                        <Link href="/admin/products">
-                            <Button type="button" variant="outline" className="rounded-xl">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 pt-4">
+                        <Link href="/admin/products" className="w-full sm:w-auto">
+                            <Button type="button" variant="outline" className="rounded-xl w-full">
                                 Cancel
                             </Button>
                         </Link>
                         <Button
                             type="submit"
-                            className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl"
+                            className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl w-full sm:w-auto"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (isEditing ? 'Updating...' : 'Creating...') : (isEditing ? 'Update Product' : 'Create Product')}

@@ -157,42 +157,46 @@ export default function AdminOrdersPage() {
                 <TableHeader>
                   <TableRow className="border-slate-200">
                     <TableHead className="text-slate-600">Order ID</TableHead>
-                    <TableHead className="text-slate-600">Customer</TableHead>
-                    <TableHead className="text-slate-600">Date</TableHead>
-                    <TableHead className="text-slate-600">Items</TableHead>
+                    <TableHead className="text-slate-600 hidden md:table-cell">Customer</TableHead>
+                    <TableHead className="text-slate-600 hidden lg:table-cell">Date</TableHead>
+                    <TableHead className="text-slate-600 hidden sm:table-cell">Items</TableHead>
                     <TableHead className="text-slate-600">Total</TableHead>
-                    <TableHead className="text-slate-600">Payment</TableHead>
+                    <TableHead className="text-slate-600 hidden md:table-cell">Payment</TableHead>
                     <TableHead className="text-slate-600">Status</TableHead>
-                    <TableHead className="text-right text-slate-600">Actions</TableHead>
+                    <TableHead className="text-right text-slate-600 hidden lg:table-cell">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {orders.map((order) => (
                     <TableRow key={order._id} className="border-slate-100">
-                      <TableCell className="font-medium text-slate-900">
-                        #{order._id.slice(-8).toUpperCase()}
+                      <TableCell>
+                        <div className="font-medium text-slate-900">
+                          #{order._id.slice(-8).toUpperCase()}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1 md:hidden">
+                          {order.userId ? `User ${order.userId.slice(-6)}` : 'N/A'}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-slate-600">
+                      <TableCell className="text-slate-600 hidden md:table-cell">
                         {order.userId ? `User ${order.userId.slice(-6)}` : 'N/A'}
                       </TableCell>
-                      <TableCell className="text-slate-600">
+                      <TableCell className="text-slate-600 hidden lg:table-cell">
                         {formatDate(order.createdAt)}
                       </TableCell>
-                      <TableCell className="text-slate-600">
+                      <TableCell className="text-slate-600 hidden sm:table-cell">
                         {order.products?.length || 0} item(s)
                       </TableCell>
                       <TableCell className="font-semibold text-slate-900">
                         ₹{order.totalAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <Badge
-                          className={`${
-                            order.paymentStatus === 'paid'
+                          className={`${order.paymentStatus === 'paid'
                               ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                               : order.paymentStatus === 'pending'
-                              ? 'bg-amber-100 text-amber-700 border-amber-200'
-                              : 'bg-red-100 text-red-700 border-red-200'
-                          } border rounded-full px-2 py-0.5 text-xs font-medium`}
+                                ? 'bg-amber-100 text-amber-700 border-amber-200'
+                                : 'bg-red-100 text-red-700 border-red-200'
+                            } border rounded-full px-2 py-0.5 text-xs font-medium`}
                         >
                           {order.paymentStatus}
                         </Badge>
@@ -204,7 +208,7 @@ export default function AdminOrdersPage() {
                             handleStatusChange(order._id, value as OrderStatus)
                           }
                         >
-                          <SelectTrigger className={`w-32 h-8 rounded-lg border ${getStatusBadgeColor(order.status)}`}>
+                          <SelectTrigger className={`w-28 sm:w-32 h-8 rounded-lg border text-xs ${getStatusBadgeColor(order.status)}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -216,10 +220,10 @@ export default function AdminOrdersPage() {
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="h-8 rounded-lg">
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
+                      <TableCell className="text-right hidden lg:table-cell">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg">
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">View</span>
                         </Button>
                       </TableCell>
                     </TableRow>

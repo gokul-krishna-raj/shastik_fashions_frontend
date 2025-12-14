@@ -174,10 +174,10 @@ export default function AdminProductsPage() {
                     <TableRow className="border-slate-200">
                       <TableHead className="text-slate-600">Image</TableHead>
                       <TableHead className="text-slate-600">Name</TableHead>
-                      <TableHead className="text-slate-600">Category</TableHead>
+                      <TableHead className="text-slate-600 hidden md:table-cell">Category</TableHead>
                       <TableHead className="text-slate-600">Price</TableHead>
-                      <TableHead className="text-slate-600">Stock</TableHead>
-                      <TableHead className="text-slate-600">Status</TableHead>
+                      <TableHead className="text-slate-600 hidden sm:table-cell">Stock</TableHead>
+                      <TableHead className="text-slate-600 hidden lg:table-cell">Status</TableHead>
                       <TableHead className="text-right text-slate-600">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -204,8 +204,15 @@ export default function AdminProductsPage() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="font-medium text-slate-900">{product.name}</TableCell>
-                        <TableCell className="text-slate-600">
+                        <TableCell>
+                          <div className="font-medium text-slate-900">{product.name}</div>
+                          <div className="text-xs text-slate-500 mt-1 md:hidden">
+                            {typeof product.category === 'string'
+                              ? (categories.find(c => c._id === product.category)?.name || 'N/A')
+                              : product.category?.name || 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-600 hidden md:table-cell">
                           {typeof product.category === 'string'
                             ? (categories.find(c => c._id === product.category)?.name || 'N/A')
                             : product.category?.name || 'N/A'}
@@ -213,15 +220,15 @@ export default function AdminProductsPage() {
                         <TableCell className="font-semibold text-slate-900">
                           ₹{product.price.toLocaleString('en-IN')}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.stock > 0
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-red-100 text-red-700'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-red-100 text-red-700'
                             }`}>
                             {product.stock}
                           </span>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden lg:table-cell">
                           <div className="flex gap-1 flex-wrap">
                             {product.isBestSeller && (
                               <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
@@ -238,17 +245,19 @@ export default function AdminProductsPage() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Link href={`/admin/products/${product._id}/edit`}>
-                              <Button variant="ghost" size="sm" className="h-8 rounded-lg">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg">
                                 <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
                               </Button>
                             </Link>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                              className="h-8 w-8 p-0 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
                               onClick={() => openDeleteDialog(product._id)}
                             >
                               <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
                             </Button>
                           </div>
                         </TableCell>
@@ -259,32 +268,32 @@ export default function AdminProductsPage() {
               </div>
 
               {/* Pagination Controls */}
-              <div className="flex items-center justify-between mt-4">
-                <div className="text-sm text-slate-600">
+              <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-3">
+                <div className="text-sm text-slate-600 hidden sm:block">
                   Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-lg h-8 px-2"
+                    className="rounded-lg h-8 px-2 sm:px-3"
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={pagination.page <= 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Previous
+                    <span className="hidden sm:inline ml-1">Previous</span>
                   </Button>
-                  <div className="text-sm font-medium">
+                  <div className="text-sm font-medium px-2">
                     Page {pagination.page} of {totalPages || 1}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-lg h-8 px-2"
+                    className="rounded-lg h-8 px-2 sm:px-3"
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page >= totalPages}
                   >
-                    Next
+                    <span className="hidden sm:inline mr-1">Next</span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>

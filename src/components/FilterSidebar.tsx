@@ -3,6 +3,8 @@ import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import { X, ChevronDown, Sparkles } from 'lucide-react';
 import { SareeFilters } from '@/types/filters';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 interface FilterSidebarProps {
   isOpen: boolean;
@@ -12,7 +14,7 @@ interface FilterSidebarProps {
   onClearAll: () => void;
 }
 
-const categories = ['Silk Sarees', 'Cotton Sarees', 'Organza Sarees', 'Banarasi Sarees', 'Kanchipuram Sarees', 'Linen Sarees', 'Designer Sarees'];
+// const categories = ['Silk Sarees', 'Cotton Sarees', 'Organza Sarees', 'Banarasi Sarees', 'Kanchipuram Sarees', 'Linen Sarees', 'Designer Sarees'];
 const fabrics = ['Silk', 'Cotton', 'Georgette', 'Chiffon', 'Crepe', 'Satin', 'Organza'];
 const colors = [
   { name: 'Red', hex: '#EF4444' },
@@ -34,6 +36,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onApply,
   onClearAll,
 }) => {
+  const { categories } = useSelector((state: RootState) => state.categories);
   const [localFilters, setLocalFilters] = useState<SareeFilters>(filters);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     category: true,
@@ -50,10 +53,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const handleCategoryChange = (category: string) => {
-    const newCategories = localFilters.category.includes(category)
-      ? localFilters.category.filter((c) => c !== category)
-      : [...localFilters.category, category];
+  const handleCategoryChange = (categoryId: string) => {
+    const newCategories = localFilters.category.includes(categoryId)
+      ? localFilters.category.filter((c) => c !== categoryId)
+      : [...localFilters.category, categoryId];
     setLocalFilters((prev) => ({ ...prev, category: newCategories }));
   };
 
@@ -140,17 +143,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               {openSections.category && (
                 <div id="category-filter-panel" className="pl-2 space-y-2">
                   {categories.map((category) => (
-                    <label key={category} className="flex items-center gap-2 text-slate-700">
+                    <label key={category._id} className="flex items-center gap-2 text-slate-700">
                       <input
                         type="checkbox"
                         name="category"
-                        value={category}
-                        checked={localFilters.category.includes(category)}
-                        onChange={() => handleCategoryChange(category)}
+                        value={category._id}
+                        checked={localFilters.category.includes(category._id)}
+                        onChange={() => handleCategoryChange(category._id)}
                         className="mr-1 accent-rose-600 focus:ring-2 focus:ring-rose-200 focus:ring-offset-2"
-                        aria-label={category}
+                        aria-label={category.name}
                       />
-                      <span>{category}</span>
+                      <span>{category.name}</span>
                     </label>
                   ))}
                 </div>

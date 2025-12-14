@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { fetchProducts, setFilters, setSort, setPage, resetProducts } from '@/store/productsSlice';
+import { fetchCategories } from '@/store/categorySlice';
 import { addToCart } from '@/store/cartSlice';
 import { addToWishlist } from '@/store/wishlistSlice';
 import ProductCard, { ProductCardSkeleton } from '@/components/ProductCard';
@@ -34,6 +35,11 @@ const ProductsPage = () => {
     },
     [status, hasMore, page, dispatch]
   );
+
+  // Fetch categories on mount
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   // Initial load and query param handling
   useEffect(() => {

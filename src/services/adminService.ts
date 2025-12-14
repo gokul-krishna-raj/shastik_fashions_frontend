@@ -39,7 +39,7 @@ export interface CreateProductPayload {
   stock: number;
   isBestSeller: boolean;
   isNewArrival: boolean;
-  images: File[];
+  images: File[] | string[];
 }
 
 export interface UpdateProductPayload extends Partial<CreateProductPayload> {
@@ -78,19 +78,32 @@ export const fetchAdminStats = async (): Promise<AdminStats> => {
 };
 
 // Admin Products
-export const fetchAdminProducts = async (page: number = 1, limit: number = 10): Promise<{
+// Admin Products
+export const fetchAdminProducts = async (
+  page: number = 1,
+  limit: number = 10,
+  filters?: { search?: string; category?: string }
+): Promise<{
   products: AdminProduct[];
   total: number;
   page: number;
   limit: number;
 }> => {
   try {
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+
+    if (filters?.search) queryParams.append('search', filters.search);
+    if (filters?.category && filters.category !== 'all') queryParams.append('category', filters.category);
+
     const response = await api.get<{
       data: AdminProduct[];
       count: number;
       page: number;
       limit: number;
-    }>(`/products?page=${page}&limit=${limit}`);
+    }>(`/products?${queryParams.toString()}`);
     return {
       products: response.data.data || [],
       total: response.data.count || 0,
@@ -103,8 +116,32 @@ export const fetchAdminProducts = async (page: number = 1, limit: number = 10): 
   }
 };
 
+export const fetchAdminProductById = async (productId: string): Promise<AdminProduct> => {
+  try {
+    const response = await api.get<{ data: AdminProduct }>(`/products/${productId}`);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('Error fetching product details:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch product details');
+  }
+};
+
 export const createAdminProduct = async (payload: CreateProductPayload): Promise<AdminProduct> => {
   try {
+    // Check if we have file uploads or URL strings
+    const hasFiles = payload.images.length > 0 && payload.images[0] instanceof File;
+
+    if (!hasFiles) {
+      // JSON Payload for URL-based images
+      const response = await api.post<{ data: AdminProduct }>('/products', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data.data;
+    }
+
+    // FormData Payload for File uploads
     const formData = new FormData();
     formData.append('name', payload.name);
     formData.append('description', payload.description);
@@ -117,7 +154,7 @@ export const createAdminProduct = async (payload: CreateProductPayload): Promise
     formData.append('isBestSeller', payload.isBestSeller.toString());
     formData.append('isNewArrival', payload.isNewArrival.toString());
 
-    payload.images.forEach((image, index) => {
+    (payload.images as File[]).forEach((image, index) => {
       formData.append('images', image);
     });
 
@@ -135,6 +172,22 @@ export const createAdminProduct = async (payload: CreateProductPayload): Promise
 
 export const updateAdminProduct = async (payload: UpdateProductPayload): Promise<AdminProduct> => {
   try {
+    // Check if image update contains Files
+    const hasFiles = payload.images && payload.images.length > 0 && payload.images[0] instanceof File;
+
+    if (!hasFiles && payload.images) {
+      // All strings (URLs)
+      // OR no images being updated (if undefined, but current logic checks length > 0)
+      // If images is array of strings, send JSON
+      const response = await api.put<{ data: AdminProduct }>(`/products/${payload._id}`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data.data;
+    }
+
+    // FormData Update
     const formData = new FormData();
     if (payload.name) formData.append('name', payload.name);
     if (payload.description) formData.append('description', payload.description);
@@ -148,7 +201,7 @@ export const updateAdminProduct = async (payload: UpdateProductPayload): Promise
     if (payload.isNewArrival !== undefined) formData.append('isNewArrival', payload.isNewArrival.toString());
 
     if (payload.images && payload.images.length > 0) {
-      payload.images.forEach((image) => {
+      (payload.images as File[]).forEach((image) => {
         formData.append('images', image);
       });
     }

@@ -12,6 +12,10 @@ interface AdminProductState {
     limit: number;
     total: number;
   };
+  filters: {
+    search: string;
+    category: string;
+  };
 }
 
 const initialState: AdminProductState = {
@@ -24,16 +28,32 @@ const initialState: AdminProductState = {
     limit: 10,
     total: 0,
   },
+  filters: {
+    search: '',
+    category: 'all',
+  },
 };
 
 export const fetchAdminProducts = createAsyncThunk(
   'adminProduct/fetchProducts',
-  async ({ page = 1, limit = 10 }: { page?: number; limit?: number }, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10, search = '', category = 'all' }: { page?: number; limit?: number; search?: string; category?: string }, { rejectWithValue }) => {
     try {
-      const response = await adminService.fetchAdminProducts(page, limit);
+      const response = await adminService.fetchAdminProducts(page, limit, { search, category });
       return response;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch products');
+    }
+  }
+);
+
+export const fetchProductDetails = createAsyncThunk(
+  'adminProduct/fetchProductDetails',
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const product = await adminService.fetchAdminProductById(productId);
+      return product;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to fetch product details');
     }
   }
 );
@@ -84,9 +104,30 @@ const adminProductSlice = createSlice({
     setCurrentProduct: (state, action: PayloadAction<AdminProduct | null>) => {
       state.currentProduct = action.payload;
     },
+    setFilters: (state, action: PayloadAction<{ search?: string; category?: string }>) => {
+      state.filters = { ...state.filters, ...action.payload };
+      state.pagination.page = 1; // Reset to first page on filter change
+    },
+    setPage: (state, action: PayloadAction<number>) => {
+      state.pagination.page = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
+      // Fetch Product Details
+      .addCase(fetchProductDetails.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchProductDetails.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.currentProduct = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchProductDetails.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
       // Fetch Products
       .addCase(fetchAdminProducts.pending, (state) => {
         state.status = 'loading';
@@ -162,6 +203,6 @@ const adminProductSlice = createSlice({
   },
 });
 
-export const { clearAdminProductError, setCurrentProduct } = adminProductSlice.actions;
+export const { clearAdminProductError, setCurrentProduct, setFilters, setPage } = adminProductSlice.actions;
 export default adminProductSlice.reducer;
 

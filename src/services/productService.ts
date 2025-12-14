@@ -10,13 +10,26 @@ interface GetProductsResponse {
   limit: number;
 }
 
-export const getProducts = async (page: number = 1, limit: number = 10, categoryId?: string, filters?: SareeFilters, sort?: string): Promise<GetProductsResponse> => {
+export const getProducts = async (
+  page: number = 1,
+  limit: number = 10,
+  categoryId?: string,
+  filters?: SareeFilters,
+  sort?: string,
+  type?: 'all' | 'new-arrivals' | 'best-sellers'
+): Promise<GetProductsResponse> => {
   try {
     const params = new URLSearchParams();
     params.append('page', page.toString());
     params.append('limit', limit.toString());
     if (categoryId) {
       params.append('categorySlug', categoryId);
+    }
+    if (type === 'best-sellers') {
+      params.append('isBestSeller', 'true');
+    }
+    if (type === 'new-arrivals') {
+      params.append('isNewArrival', 'true');
     }
     if (filters) {
       if (filters.category && filters.category.length > 0) {
@@ -50,8 +63,8 @@ export const getProducts = async (page: number = 1, limit: number = 10, category
 };
 
 export const getProductById = async (id: string): Promise<Product> => {
-  try { 
-    const response:any = await unauthApi.get<Product>(`/products/${id}`);
+  try {
+    const response: any = await unauthApi.get<Product>(`/products/${id}`);
     return response.data.data;
   } catch (error) {
     console.error(`Error fetching product with ID ${id}:`, error);

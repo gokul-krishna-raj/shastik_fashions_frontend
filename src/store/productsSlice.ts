@@ -59,7 +59,7 @@ export const fetchProducts = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await getProducts(page, limit, categoryId, filters, sort);
+      const response = await getProducts(page, limit, categoryId, filters, sort, type);
       return {
         products: response.products,
         page: response.page,

@@ -9,9 +9,9 @@ interface SortDropdownProps {
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
-  { value: 'price_asc', label: 'Price: Low to High' },
-  { value: 'price_desc', label: 'Price: High to Low' },
-  { value: 'best_selling', label: 'Best Selling' },
+  { value: 'price_low', label: 'Price: Low to High' },
+  { value: 'price_high', label: 'Price: High to Low' },
+  { value: 'best_sellers', label: 'Best Selling' },
 ];
 
 const SortDropdown: React.FC<SortDropdownProps> = ({ currentSort, onSortChange }) => {

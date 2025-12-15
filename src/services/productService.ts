@@ -32,8 +32,11 @@ export const getProducts = async (
       params.append('isNewArrival', 'true');
     }
     if (filters) {
+      // Backend expects 'category' for single category ID filtering
+      // Since we're using category IDs in the filter, send the first one if available
       if (filters.category && filters.category.length > 0) {
-        params.append('categories', filters.category.join(','));
+        // Backend supports single category, so we'll send the first selected category
+        params.append('category', filters.category[0]);
       }
       if (filters.color && filters.color.length > 0) {
         params.append('colors', filters.color.join(','));
@@ -41,13 +44,15 @@ export const getProducts = async (
       if (filters.fabric && filters.fabric.length > 0) {
         params.append('fabrics', filters.fabric.join(','));
       }
-      if (filters.priceRange) {
-        params.append('minPrice', filters.priceRange[0].toString());
-        params.append('maxPrice', filters.priceRange[1].toString());
-      }
+      // Note: Backend doesn't support price range filtering yet
+      // if (filters.priceRange) {
+      //   params.append('minPrice', filters.priceRange[0].toString());
+      //   params.append('maxPrice', filters.priceRange[1].toString());
+      // }
     }
     if (sort) {
-      params.append('sort', sort);
+      // Backend expects 'sortBy' parameter
+      params.append('sortBy', sort);
     }
     const response = await unauthApi.get<{ success: boolean; message: string; data: Product[]; count: number; page: number; pages: number; limit: number }>(`/products?${params.toString()}`);
     return {

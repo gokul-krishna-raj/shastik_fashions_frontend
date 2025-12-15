@@ -54,9 +54,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
 
   const handleCategoryChange = (categoryId: string) => {
+    // Backend only supports single category filtering
     const newCategories = localFilters.category.includes(categoryId)
-      ? localFilters.category.filter((c) => c !== categoryId)
-      : [...localFilters.category, categoryId];
+      ? [] // Deselect if clicking the same category
+      : [categoryId]; // Select only this category
     setLocalFilters((prev) => ({ ...prev, category: newCategories }));
   };
 
@@ -143,9 +144,9 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               {openSections.category && (
                 <div id="category-filter-panel" className="pl-2 space-y-2">
                   {categories.map((category) => (
-                    <label key={category._id} className="flex items-center gap-2 text-slate-700">
+                    <label key={category._id} className="flex items-center gap-2 text-slate-700 cursor-pointer">
                       <input
-                        type="checkbox"
+                        type="radio"
                         name="category"
                         value={category._id}
                         checked={localFilters.category.includes(category._id)}
@@ -189,7 +190,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               )}
             </div>
 
-            <div className="mb-6 border-b border-rose-100 pb-4" role="group" aria-labelledby="price-range-filter-heading">
+            {/* Price Range Filter - Temporarily disabled as backend doesn't support it yet */}
+            {/* <div className="mb-6 border-b border-rose-100 pb-4" role="group" aria-labelledby="price-range-filter-heading">
               <button
                 className="flex justify-between items-center w-full text-left font-semibold text-lg mb-3 text-slate-900 hover:text-rose-700 transition-colors"
                 onClick={() => handleToggleSection('priceRange')}
@@ -222,7 +224,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
 
             <div className="mb-6 pb-2" role="group" aria-labelledby="fabric-filter-heading">
               <button

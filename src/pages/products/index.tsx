@@ -20,6 +20,7 @@ const ProductsPage = () => {
   const { token } = useSelector((state: RootState) => state.user);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const isInitialMount = useRef(true);
 
   const observer = useRef<IntersectionObserver>();
   const lastProductElementRef = useCallback(
@@ -41,36 +42,27 @@ const ProductsPage = () => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  // Initial load and query param handling
+  // Initial load - only run once on mount
   useEffect(() => {
-    const { category, priceRange, fabric, color, sort: sortParam, page: pageParam } = router.query;
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      const { category, priceRange, fabric, color, sort: sortParam, page: pageParam } = router.query;
 
-    const initialFilters: SareeFilters = {
-      category: typeof category === 'string' ? [category] : (category as string[] || []),
-      priceRange: priceRange ? (priceRange as string).split('-').map(Number) as [number, number] : [500, 20000],
-      fabric: typeof fabric === 'string' ? [fabric] : (fabric as string[] || []),
-      color: typeof color === 'string' ? [color] : (color as string[] || []),
-    };
-    const initialSort = (sortParam as string) || 'newest';
-    const initialPage = pageParam ? Number(pageParam) : 1;
+      const initialFilters: SareeFilters = {
+        category: typeof category === 'string' ? [category] : (category as string[] || []),
+        priceRange: priceRange ? (priceRange as string).split('-').map(Number) as [number, number] : [500, 20000],
+        fabric: typeof fabric === 'string' ? [fabric] : (fabric as string[] || []),
+        color: typeof color === 'string' ? [color] : (color as string[] || []),
+      };
+      const initialSort = (sortParam as string) || 'newest';
+      const initialPage = pageParam ? Number(pageParam) : 1;
 
-    // Only dispatch if values are different from current Redux state
-    // Note: Deep comparison for filters might be needed for complex objects
-    if (JSON.stringify(initialFilters) !== JSON.stringify(filters)) {
       dispatch(setFilters(initialFilters));
-    }
-    if (initialSort !== sort) {
       dispatch(setSort(initialSort));
-    }
-    if (initialPage !== page) {
       dispatch(setPage(initialPage));
-    }
-
-    // Fetch products if not already loading or succeeded with current filters/sort/page
-    if (status === 'idle' || (status === 'succeeded' && products.length === 0 && initialPage === 1)) {
       dispatch(fetchProducts({ page: initialPage, filters: initialFilters, sort: initialSort, append: false }));
     }
-  }, [router.query, dispatch, filters, page, products.length, sort, status]); // Depend on router.query to re-evaluate when URL changes
+  }, []); // Only run once on mount
 
   // Fetch more products when page changes (for infinite scroll)
   useEffect(() => {
